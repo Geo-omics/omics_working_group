@@ -1,7 +1,0 @@
-channels:
-    - bioconda
-    - conda-forge
-    - defaults
-
-dependencies:
-    - sourmash=4.5.0
