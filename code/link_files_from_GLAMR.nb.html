@@ -1755,8 +1755,28 @@ display: none;
 <!-- rnb-text-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5zYW1wbGVfdGFibGUgPC0gcmVhZF90c3YoXCJHcmVhdF9MYWtlc19PbWljc19EYXRhc2V0cy54bHN4IC0gc2FtcGxlcyAoMikudHN2XCIpICU+JSBcbiAgZmlsdGVyKFN0dWR5SUQgPT0gXCJzZXRfMzVcIilcblxuI3NhbXBsZXNfdG9fdXNlIDwtIGMoXCJzYW1wXzQ0N1wiLCBcInNhbXBfNjU0XCIsIFwic2FtcF82NTZcIilcblxucmVhZF9wYXRocyA8LSBzeXN0ZW0oXCJscyAvZ2VvbWljcm8vZGF0YTIva2lsZWRhbC9HTEFNUi9kYXRhL29taWNzL21ldGFnZW5vbWVzLyovcmVhZHMvZGVjb25fKl9yZWFkc19mYXN0cC5mYXN0cS5nelwiLGludGVybiA9IFRSVUUpICU+JSBcbiAgZGF0YV9mcmFtZShyZWFkX3BhdGggPSAuKSAlPiUgXG4gIG11dGF0ZShzYW1wbGUgPSByZWFkX3BhdGggJT4lIHN0cl9yZW1vdmUoXCIuKm1ldGFnZW5vbWVzL1wiKSAlPiUgc3RyX3JlbW92ZShcIi9yZWFkcy4qXCIpLFxuICAgICAgICAgcmVhZF9kaXIgPSByZWFkX3BhdGggJT4lIHN0cl9yZW1vdmUoXCIuKmRlY29uX1wiKSAlPiUgc3RyX3JlbW92ZShcIl9yZWFkc19mYXN0cC4qXCIpLFxuICAgICAgICAgbmV3X3BhdGggPSBzdHJfZ2x1ZShcImRhdGEvcmVhZHNfZm9yX2Jpbm5pbmcve3NhbXBsZX1fe3JlYWRfZGlyfS5mYXN0cS5nelwiKSkgJT4lIFxuICBmaWx0ZXIoc2FtcGxlICVpbiUgc2FtcGxlX3RhYmxlJFNhbXBsZUlEKVxuXG5maWxlLnN5bWxpbmsocmVhZF9wYXRocyRyZWFkX3BhdGgsIHJlYWRfcGF0aHMkbmV3X3BhdGgpXG5gYGAifQ== -->
+<pre class="r"><code>
+sample_table &lt;- read_tsv(&quot;Great_Lakes_Omics_Datasets.xlsx - samples (2).tsv&quot;) %&gt;% 
+  filter(StudyID == &quot;set_35&quot;)
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKYGBge3Igc2V0dXAsIGluY2x1ZGU9RkFMU0V9CmtuaXRyOjpvcHRzX2tuaXQkc2V0KHJvb3QuZGlyID0gaGVyZTo6aGVyZSgiIikpCmxpYnJhcnkodGlkeXZlcnNlKQpgYGAKCg==</div>
+#samples_to_use &lt;- c(&quot;samp_447&quot;, &quot;samp_654&quot;, &quot;samp_656&quot;)
+
+read_paths &lt;- system(&quot;ls /geomicro/data2/kiledal/GLAMR/data/omics/metagenomes/*/reads/decon_*_reads_fastp.fastq.gz&quot;,intern = TRUE) %&gt;% 
+  data_frame(read_path = .) %&gt;% 
+  mutate(sample = read_path %&gt;% str_remove(&quot;.*metagenomes/&quot;) %&gt;% str_remove(&quot;/reads.*&quot;),
+         read_dir = read_path %&gt;% str_remove(&quot;.*decon_&quot;) %&gt;% str_remove(&quot;_reads_fastp.*&quot;),
+         new_path = str_glue(&quot;data/reads_for_binning/{sample}_{read_dir}.fastq.gz&quot;)) %&gt;% 
+  filter(sample %in% sample_table$SampleID)
+
+file.symlink(read_paths$read_path, read_paths$new_path)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKYGBge3Igc2V0dXAsIGluY2x1ZGU9RkFMU0V9CmtuaXRyOjpvcHRzX2tuaXQkc2V0KHJvb3QuZGlyID0gaGVyZTo6aGVyZSgiIikpCmxpYnJhcnkodGlkeXZlcnNlKQpgYGAKCmBgYHtyfQoKc2FtcGxlX3RhYmxlIDwtIHJlYWRfdHN2KCJHcmVhdF9MYWtlc19PbWljc19EYXRhc2V0cy54bHN4IC0gc2FtcGxlcyAoMikudHN2IikgJT4lIAogIGZpbHRlcihTdHVkeUlEID09ICJzZXRfMzUiKQoKI3NhbXBsZXNfdG9fdXNlIDwtIGMoInNhbXBfNDQ3IiwgInNhbXBfNjU0IiwgInNhbXBfNjU2IikKCnJlYWRfcGF0aHMgPC0gc3lzdGVtKCJscyAvZ2VvbWljcm8vZGF0YTIva2lsZWRhbC9HTEFNUi9kYXRhL29taWNzL21ldGFnZW5vbWVzLyovcmVhZHMvZGVjb25fKl9yZWFkc19mYXN0cC5mYXN0cS5neiIsaW50ZXJuID0gVFJVRSkgJT4lIAogIGRhdGFfZnJhbWUocmVhZF9wYXRoID0gLikgJT4lIAogIG11dGF0ZShzYW1wbGUgPSByZWFkX3BhdGggJT4lIHN0cl9yZW1vdmUoIi4qbWV0YWdlbm9tZXMvIikgJT4lIHN0cl9yZW1vdmUoIi9yZWFkcy4qIiksCiAgICAgICAgIHJlYWRfZGlyID0gcmVhZF9wYXRoICU+JSBzdHJfcmVtb3ZlKCIuKmRlY29uXyIpICU+JSBzdHJfcmVtb3ZlKCJfcmVhZHNfZmFzdHAuKiIpLAogICAgICAgICBuZXdfcGF0aCA9IHN0cl9nbHVlKCJkYXRhL3JlYWRzX2Zvcl9iaW5uaW5nL3tzYW1wbGV9X3tyZWFkX2Rpcn0uZmFzdHEuZ3oiKSkgJT4lIAogIGZpbHRlcihzYW1wbGUgJWluJSBzYW1wbGVfdGFibGUkU2FtcGxlSUQpCgpmaWxlLnN5bWxpbmsocmVhZF9wYXRocyRyZWFkX3BhdGgsIHJlYWRfcGF0aHMkbmV3X3BhdGgpCmBgYAoK</div>
 
 
 

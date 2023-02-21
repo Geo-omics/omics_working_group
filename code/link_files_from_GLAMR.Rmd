@@ -8,3 +8,20 @@ knitr::opts_knit$set(root.dir = here::here(""))
 library(tidyverse)
 ```
 
+```{r}
+
+sample_table <- read_tsv("Great_Lakes_Omics_Datasets.xlsx - samples (2).tsv") %>% 
+  filter(StudyID == "set_35")
+
+#samples_to_use <- c("samp_447", "samp_654", "samp_656")
+
+read_paths <- system("ls /geomicro/data2/kiledal/GLAMR/data/omics/metagenomes/*/reads/decon_*_reads_fastp.fastq.gz",intern = TRUE) %>% 
+  data_frame(read_path = .) %>% 
+  mutate(sample = read_path %>% str_remove(".*metagenomes/") %>% str_remove("/reads.*"),
+         read_dir = read_path %>% str_remove(".*decon_") %>% str_remove("_reads_fastp.*"),
+         new_path = str_glue("data/reads_for_binning/{sample}_{read_dir}.fastq.gz")) %>% 
+  filter(sample %in% sample_table$SampleID)
+
+file.symlink(read_paths$read_path, read_paths$new_path)
+```
+
