@@ -4,3 +4,4 @@
 *.zip
 *.csv
 *.sqldb
+.Rproj.user
