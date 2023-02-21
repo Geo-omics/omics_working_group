@@ -36,6 +36,6 @@ rule sourmash_gather:
 
         sourmash tax annotate -g {output.reps} -t {input.gtdb_taxDB}
 
-        mv $(basename {output.tax}) data/sourmash/outputs/{wildcards.sample}_tax.csv
+        mv {wildcards.sample}_reps.with-lineages.csv {output.tax}
         """
 
