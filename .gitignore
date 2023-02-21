@@ -1,0 +1,6 @@
+*fastq.gz
+*fastq
+*.sig
+*.zip
+*.csv
+*.sqldb
