@@ -4,7 +4,7 @@ output: html_notebook
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_knit$set(root.dir = here::here(""))
+knitr::opts_knit$set(root.dir = here::here("~/projects/2023_metagenomics_working_group"))
 library(tidyverse)
 ```
 
@@ -23,5 +23,8 @@ read_paths <- system("ls /geomicro/data2/kiledal/GLAMR/data/omics/metagenomes/*/
   filter(sample %in% sample_table$SampleID)
 
 file.symlink(read_paths$read_path, read_paths$new_path)
+
+file.symlink("/geomicro/data2/kiledal/GLAMR/data/omics/metagenomes/samp_447/assembly/megahit_noNORM/final.contigs.renamed.fa", "data/assemblies/samp_447.fasta")
+
 ```
 
