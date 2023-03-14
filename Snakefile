@@ -7,6 +7,17 @@ sample_list = glob_wildcards("data/reads/{sample}__fwd.fastq.gz").sample
 
 binning_samples = glob_wildcards("data/reads_for_binning/{sample}_{read_dir_coverm}.fastq.gz").sample
 
+binning_example_sample = "samp_447" # I've only been binning one example sample for the working group, which I'll use below for the appropriate binning steps rather than all of the samples from  binning_samples or sample_list
+
+rule all:
+    input:
+        #expand("data/sourmash/outputs/{sample}_tax.csv", sample = sample_list), # I commented this out to focus on binning
+        expand("data/binning/{sample}/METABAT2/.done", sample = binning_example_sample),
+        expand("data/binning/{sample}/bin_coverage.tsv", sample = binning_example_sample),
+        expand("data/binning/{sample}/checkm.txt", sample = binning_example_sample),
+        expand("data/binning/{sample}/gtdbtk", sample = binning_example_sample)
+
+
 rule run_sourmash:
     input: expand("data/sourmash/outputs/{sample}_tax.csv", sample=sample_list)
 
@@ -87,4 +98,56 @@ rule metabat2:
             -m 2000 \
             -t {resources.cpus} \
             --unbinned
+        """
+
+rule checkM:
+    input: "data/binning/{sample}/METABAT2/.done"
+    output:
+        dir = temp(directory("data/binning/{sample}/checkm")),
+        results = "data/binning/{sample}/checkm.txt"
+    params:
+        bin_dir = "data/binning/{sample}/METABAT2"
+    conda: "config/checkm.yaml"
+    resources: cpus=8, mem_mb=80000, time_min=2880, mem_gb = 80
+    shell:
+        """
+        checkm lineage_wf --tab_table -f {output.results} -x fa -t {resources.cpus} {params.bin_dir} {output.dir}
+        """
+
+
+rule gtdbtk:
+    input:
+        metabat_done = "data/binning/{sample}/METABAT2/.done",
+        refs = "/geomicro/data2/kiledal/references/gtdbtk/release207_v2"
+    output: directory("data/binning/{sample}/gtdbtk")
+    params:
+        bin_dir = "data/binning/{sample}/METABAT2"
+    conda: "config/gtdbtk.yaml"
+    resources: cpus=1, mem_mb=500000, time_min=2880, mem_gb = 500
+    shell:
+        """
+        export GTDBTK_DATA_PATH={input.refs}
+
+        gtdbtk classify_wf --extension fa --genome_dir {params.bin_dir} --out_dir {output} --cpus {resources.cpus}
+        """
+
+rule coverm_bin_coverage:
+    input:
+        reads = expand("data/reads_for_binning/{sample}_{dir}.fastq.gz", sample = binning_samples, dir = ["R1", "R2"]),
+        metabat_done = "data/binning/{sample}/METABAT2/.done"
+    output:
+        coverage_metabat = "data/binning/{sample}/bin_coverage.tsv"
+    params:
+        bin_dir = "data/binning/{sample}/METABAT2"
+    conda: "config/coverm.yml"
+    resources: cpus = 16, mem_mb = 100000, time_min = 20000
+    shell:
+        """
+        coverm genome \
+            -t {resources.cpus} \
+            -m relative_abundance mean covered_bases variance length \
+            --min-covered-fraction 0 \
+            -c {input.reads} \
+            --genome-fasta-files {params.bin_dir}/*.fa \
+            -o {output}
         """

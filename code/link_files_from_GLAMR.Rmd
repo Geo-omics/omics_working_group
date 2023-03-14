@@ -10,20 +10,25 @@ library(tidyverse)
 
 ```{r}
 
+# Read in sample table and filter to only one dataset (geomicro lab western lake erie JGI-CSP metagenomes)
 sample_table <- read_tsv("Great_Lakes_Omics_Datasets.xlsx - samples (2).tsv") %>% 
   filter(StudyID == "set_35")
 
 #samples_to_use <- c("samp_447", "samp_654", "samp_656")
 
+# Find all reads in GLAMR, make a formatted table including where to link them, and filter for reads from our study of interest.
 read_paths <- system("ls /geomicro/data2/kiledal/GLAMR/data/omics/metagenomes/*/reads/decon_*_reads_fastp.fastq.gz",intern = TRUE) %>% 
   data_frame(read_path = .) %>% 
   mutate(sample = read_path %>% str_remove(".*metagenomes/") %>% str_remove("/reads.*"),
          read_dir = read_path %>% str_remove(".*decon_") %>% str_remove("_reads_fastp.*"),
-         new_path = str_glue("data/reads_for_binning/{sample}_{read_dir}.fastq.gz")) %>% 
+         read_dir_coverm = if_else(read_dir == "fwd", "R1", "R2"),
+         new_path = str_glue("data/reads_for_binning/{sample}_{read_dir_coverm}.fastq.gz")) %>% 
   filter(sample %in% sample_table$SampleID)
 
+# Link the reads for determining contig coverage in all samples from this dataset
 file.symlink(read_paths$read_path, read_paths$new_path)
 
+# Link an assembly to bin as well
 file.symlink("/geomicro/data2/kiledal/GLAMR/data/omics/metagenomes/samp_447/assembly/megahit_noNORM/final.contigs.renamed.fa", "data/assemblies/samp_447.fasta")
 
 ```
