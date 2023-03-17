@@ -128,7 +128,12 @@ rule gtdbtk:
         """
         export GTDBTK_DATA_PATH={input.refs}
 
-        gtdbtk classify_wf --extension fa --genome_dir {params.bin_dir} --out_dir {output} --cpus {resources.cpus}
+        gtdbtk classify_wf \
+            --extension fa \
+            --genome_dir {params.bin_dir} \
+            --out_dir {output} \
+            --skip_ani_screen \
+            --cpus {resources.cpus}
         """
 
 rule coverm_bin_coverage:
