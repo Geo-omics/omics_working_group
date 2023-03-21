@@ -1,0 +1,144 @@
+---
+title: "Summarize bin stats"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = here::here(""))
+library(tidyverse)
+```
+
+
+## checkM
+```{r}
+# make dataframe of checkM result paths with columsn for project & sample
+checkm_paths <- system("ls /geomicro/data2/kiledal/projects/2023_metagenomics_working_group/data/binning/*/checkm.txt", intern= TRUE) %>% 
+  data.frame(path = .) %>% 
+  bind_cols(unglue::unglue_data(.$path, "/geomicro/data2/kiledal/projects/{project}/data/binning/{sample}/checkm.txt"))
+
+# Define a function for reading in a .tsv file and adding a column for the corresponding sample
+read_and_append_samplename <- function(path, sampleID){
+  out <- read_tsv(path) %>% 
+    mutate(sample = sampleID)
+  
+  return(out)
+}
+
+# Read in checkM results
+checkM_results <- map2_df(checkm_paths$path, checkm_paths$sample, read_and_append_samplename) %>% 
+  filter(!str_detect(`Bin Id`, "unbinned|tooShort|lowDepth")) # remove metabat outputs for unbinned contigs
+
+# Create a simplified results table for merging with results from other tools
+checkm_simp <- checkM_results %>% 
+  select(genome = "Bin Id", completeness = "Completeness", contamination = "Contamination", strain_het = "Strain heterogeneity") %>% 
+  rename_with(.cols = -genome, .fn = ~paste0("checkm_",.x))
+```
+
+## GTDB
+
+```{r}
+# Get list of GTDB outputs for bacteria & archaea
+gtdb_paths <- system("ls /geomicro/data2/kiledal/projects/2023_metagenomics_working_group/data/binning/*/gtdbtk/gtdbtk.*.summary.tsv", intern= TRUE) %>% 
+  data.frame(path = .) %>% 
+  bind_cols(unglue::unglue_data(.$path, "/geomicro/data2/kiledal/projects/{project}/data/binning/{sample}/gtdbtk/gtdbtk.{domain}.summary.tsv"))
+
+# Get paths for just bacterial classifications
+bac_paths <- gtdb_paths %>% 
+  filter(domain == "bac120")
+
+# Get paths for just archael classifications  
+arc_paths <- gtdb_paths %>% 
+  filter(domain == "ar53")
+
+# Read in bacterial classifications
+gtdb_bac_results <- map2_df(bac_paths$path, bac_paths$sample, read_and_append_samplename) %>% 
+  filter(!str_detect(user_genome, "unbinned|tooShort|lowDepth"))
+
+# Simplify bacterial classifications
+gtdb_simp_bac <- gtdb_bac_results %>% 
+  select(genome = "user_genome",classification, red_value) %>% 
+  rename_with(.cols = -genome, .fn = ~paste0("gtdb_",.x))
+
+# Read in archaea classifications
+gtdb_arc_results <- map2_df(arc_paths$path, arc_paths$sample, read_and_append_samplename) %>% 
+  filter(!str_detect(user_genome, "unbinned|tooShort|lowDepth"))
+
+# Simplify archaeal classifications
+gtdb_simp_arc <- gtdb_arc_results %>% 
+  select(genome = "user_genome",classification, red_value) %>% 
+  rename_with(.cols = -genome, .fn = ~paste0("gtdb_",.x))
+
+# combine results from bacteria and archaea
+gtdb_simp <- bind_rows(gtdb_simp_arc, gtdb_simp_bac)
+```
+
+## CoverM
+```{r}
+# Get list of coverm outputs
+coverm_paths <- system("ls /geomicro/data2/kiledal/projects/2023_metagenomics_working_group/data/binning/*/bin_coverage.tsv", intern= TRUE) %>% 
+  data.frame(path = .) %>% 
+  bind_cols(unglue::unglue_data(.$path, "/geomicro/data2/kiledal/projects/{project}/data/binning/{sample}/bin_coverage.tsv"))
+
+# Clean up coverm results
+coverm_results <- map2_df(coverm_paths$path, coverm_paths$sample, read_and_append_samplename) %>% 
+  dplyr::rename(genome = "Genome", binning_sample = "sample") %>% # make names consistent with other tables
+  filter(!str_detect(genome, "unbinned|tooShort|lowDepth")) %>% # filter out metabat2 extra unbinned contigs
+  pivot_longer(-c(genome,binning_sample), names_to = "sample_and_metric", values_to = "value",values_transform = as.character) %>% # make a long data frame
+  mutate(reads_sample = str_remove(sample_and_metric, "_R1.fastq.gz.*"), # get name of reads mapped from old column names
+         metric = str_remove(sample_and_metric, ".*fastq.gz "), # get coverage metric from old column names
+         metric = str_remove(metric, "\\.\\.\\..*"), # clean up metric names, removing ...# from the column headers
+         metric = case_when(metric == "Length" ~ "length", # clean up metric names
+                            metric == "Variance" ~ "variance",
+                            metric == "Covered Bases" ~ "covered_bases",
+                            metric == "Mean" ~ "mean_coverage",
+                            metric == "Relative Abundance (%)" ~ "rel_abund",
+                            .default = metric)) %>% 
+  select(-sample_and_metric) %>% # remove original column names
+  filter(!is.na(value)) %>% # remove NAs
+  distinct() # for some reason things were duplicated, removing duplicates
+
+coverm_wide <- coverm_results %>% 
+  pivot_wider(names_from = metric, values_from = value) %>% # convert to semi-wide with columns for genome and sample
+  type_convert() %>% # make sure columns have the right format
+  mutate(percent_of_genome_covered = covered_bases / length) # calculate the percent of each bin covered by reads, useful for filtering out spurious hits
+```
+## Combine results and make plot of bin abundance across samples
+```{r}
+# define taxonomy levels for splitting GTDB classifications
+tax_levels <- c("kingdom", "phylum","class","order","family","genus","species")
+
+# combine coverm results with results from checkm & gtdb
+rel_abund_w_tax_and_checkM <- coverm_wide %>% 
+  left_join(checkm_simp) %>% 
+  left_join(gtdb_simp) %>% 
+  separate(gtdb_classification, into = tax_levels,sep = ";[a-z]__",remove = FALSE) %>% # make individual columns for each classification level
+  mutate(kingdom = kingdom %>% str_remove( "d__"), # cleanup kingdom name
+         across(tax_levels, ~if_else(genome == "unmapped", "unmapped", .x)), # make "taxonomy" = unmapped for unmapped read metrics @ all tax levels
+         )
+
+# Barplot of taxa in samples summarized by phylum
+rel_abund_w_tax_and_checkM %>% 
+  filter(percent_of_genome_covered > .5 | genome == "unmapped") %>% # filter to only include genomes at least 50% covered by reads & also unmapped read stats
+  group_by(reads_sample, kingdom, phylum) %>% # define groups to summarize by
+  summarise(rel_abund = sum(rel_abund)) %>% # calculate abundance grouped @ phlyum level
+  ggplot(aes(reads_sample, rel_abund, fill = phylum)) +
+  geom_bar(stat = "identity") +
+  labs(y = "% abundance", x = "sample") +
+  scale_x_discrete(guide = guide_axis(angle = -45)) +
+  theme_bw()
+
+# plot relative abundance of all bins across all samples
+rel_abund_w_tax_and_checkM %>% 
+  filter(percent_of_genome_covered > .5 | genome == "unmapped") %>% # filter to only include genomes at least 50% covered by reads & also unmapped read stats
+  ggplot(aes(reads_sample, genome, size = rel_abund, color = rel_abund)) +
+  #geom_bar(stat = "identity") +
+  geom_point() +
+  scale_size_area() +
+  scale_color_viridis_c(trans = "log10") +
+  labs(y = "% abundance", x = "sample") +
+  scale_x_discrete(guide = guide_axis(angle = -45)) +
+  theme_bw()
+
+```
+
+
