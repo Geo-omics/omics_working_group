@@ -36,6 +36,16 @@ checkm_simp <- checkM_results %>%
 
 ## GTDB
 
+If you run into issues with some columns reading in as numeric for one sample and character for another, use ~this:
+
+```{}
+n_col <- read_tsv(gtdb_paths$path[1]) %>% ncol()
+gtdb_bac <- map_df(gtdb_paths$path,read_tsv, col_types = paste0(rep("c",n_col),collapse = "")) %>%
+     type_convert() %>% 
+     mutate(red_value = as.numeric(red_value))
+```
+
+
 ```{r}
 # Get list of GTDB outputs for bacteria & archaea
 gtdb_paths <- system("ls /geomicro/data2/kiledal/projects/2023_metagenomics_working_group/data/binning/*/gtdbtk/gtdbtk.*.summary.tsv", intern= TRUE) %>% 
@@ -80,7 +90,7 @@ coverm_paths <- system("ls /geomicro/data2/kiledal/projects/2023_metagenomics_wo
   bind_cols(unglue::unglue_data(.$path, "/geomicro/data2/kiledal/projects/{project}/data/binning/{sample}/bin_coverage.tsv"))
 
 # Clean up coverm results
-coverm_results <- map2_df(coverm_paths$path, coverm_paths$sample, read_and_append_samplename) %>% 
+coverm_results <- map2_df(coverm_paths$path[1], coverm_paths$sample[1], read_and_append_samplename) %>% 
   dplyr::rename(genome = "Genome", binning_sample = "sample") %>% # make names consistent with other tables
   filter(!str_detect(genome, "unbinned|tooShort|lowDepth")) %>% # filter out metabat2 extra unbinned contigs
   pivot_longer(-c(genome,binning_sample), names_to = "sample_and_metric", values_to = "value",values_transform = as.character) %>% # make a long data frame

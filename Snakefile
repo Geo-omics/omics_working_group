@@ -156,3 +156,100 @@ rule coverm_bin_coverage:
             --genome-fasta-files {params.bin_dir}/*.fa \
             -o {output}
         """
+
+
+# rule ref_read_mapping:
+#     input:
+#         f_reads = "data/reads/{sample}__fwd.fastq.gz",
+#         r_reads = "data/reads/{sample}__rev.fastq.gz"
+#         ref = "data/reference/blast_queries/{ref_seqs}.fasta"
+#     output:
+#         temp_bam = temp("data/omics/{sample_type}/{sample}/ref_read_mapping/{ref_seqs}_mapped_temp.bam"),
+#         sam = temp("data/omics/{sample_type}/{sample}/ref_read_mapping/{ref_seqs}_mapped.sam"),
+#         unsorted_bam = temp("data/omics/{sample_type}/{sample}/ref_read_mapping/{ref_seqs}_mapped_unsorted.bam"),
+#         bam = "data/omics/{sample_type}/{sample}/ref_read_mapping/{ref_seqs}_mapped.bam"
+#     conda: "config/conda_yaml/minimap2.yaml"
+#     log: "logs/ref_read_mapping/{sample_type}-{sample}.{ref_seqs}.log"
+#     benchmark: "benchmarks/ref_read_mapping/{sample_type}-{sample}.{ref_seqs}.tsv"
+#     resources: cpus=8
+#     shell:
+#         """
+#         minimap2 \
+#             -ax sr \
+#             -t {resources.cpus} \
+#             --secondary=yes \
+#             {input.ref} \
+#             {input.f_reads} {input.r_reads} > {output.sam}
+
+#         samtools view -bS {output.sam} > {output.temp_bam}
+        
+#         filterBam \
+#             --in {output.temp_bam} \
+#             --out {output.unsorted_bam} \
+#             --minCover 50 \
+#             --minId 80
+        
+#         samtools sort -o {output.bam} -@ {resources.cpus} {output.unsorted_bam}
+#         samtools index -@ {resources.cpus} {output.bam}
+#         """
+
+# rule ref_read_mapping_pileup:
+#     input:
+#         bam = "data/omics/{sample_type}/{sample}/ref_read_mapping/{ref_seqs}_mapped.bam",
+#         ref = "data/reference/blast_queries/{ref_seqs}.fasta"
+#     output:
+#         pileup = "data/omics/{sample_type}/{sample}/ref_read_mapping/{ref_seqs}_pileup.txt"
+#     conda: "config/conda_yaml/minimap2.yaml"
+#     log: "logs/ref_read_mapping_pileup/{sample_type}-{sample}.{ref_seqs}.log"
+#     benchmark: "benchmarks/ref_read_mapping_pileup/{sample_type}-{sample}.{ref_seqs}.tsv"
+#     resources: cpus=1
+#     shell:
+#         """
+#         samtools mpileup -f {input.ref} -o {output.pileup} {input.bam}
+#         """
+
+# rule run_toxin_gene_read_mapping:
+#     input: 
+#         #expand("data/omics/metagenomes/{sample}/ref_read_mapping/toxin-genes_mapped.bam", sample = qcd_samples),
+#         expand("data/omics/metagenomes/{sample}/ref_read_mapping/toxin-genes_pileup.txt", sample = qcd_samples),
+#         expand("data/omics/metatranscriptomes/{sample}/ref_read_mapping/toxin-genes_pileup.txt", sample = qcd_transcript_samples)
+
+
+rule prodigal_mags:
+    input: 
+        bin = "data/binning/{sample}/METABAT2/{bin}.fa"
+    output:
+        genes = "data/prodigal_mags/{sample}/{bin}.gbk",
+        proteins = "data/prodigal_mags/{sample}/{bin}.faa"
+    conda: "config/prodigal.yaml"
+    log: "logs/progdigal_mags/{sample}__{bin}.log"
+    shell:
+        """
+        prodigal \
+            -i {input.bin} \
+            -a {output.proteins} \
+            -d {output.genes} \
+            1>{log} 2>&1
+        """
+
+rule kofam_scan:
+    input:
+        genes = rules.prodigal_mags.output.genes,
+        profile = "/geomicro/data2/kiledal/GLAMR/data/reference/kegg/kofamscan/profiles",
+        ko_list = "/geomicro/data2/kiledal/GLAMR/data/reference/kegg/kofamscan/ko_list"
+    output:
+        ko_annot = "data/kofamscan/{sample}/{bin}_kofam_results.txt"
+    conda: "config/kofamscan.yaml"
+    resources: cpus=24, time_min = 20000, mem_mb = lambda wildcards, attempt: attempt * 100000
+    shell:
+        """
+        exec_annotation \
+            -o {output.ko_annot} \
+            --cpu={resources.cpus}  \
+            --profile {input.profile} \
+            --tmp-dir=/tmp/{wildcards.sample}_kofamscan \
+            --ko-list {input.ko_list} {input.genes}
+        """
+
+rule run_kofamscan_bins:
+    input: expand("data/kofamscan/{sample}/{bin}_kofam_results.txt", bin = glob_wildcards("data/binning/{sample}/METABAT2/{bin}.fa").bin, sample = binning_example_sample)
