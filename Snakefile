@@ -240,11 +240,12 @@ rule kofam_scan:
     output:
         ko_annot = "data/kofamscan/{sample}/{bin}_kofam_results.txt"
     conda: "config/kofamscan.yaml"
-    resources: cpus=24, time_min = 20000, mem_mb = lambda wildcards, attempt: attempt * 100000
+    resources: cpus=64, time_min = 20000, mem_mb = lambda wildcards, attempt: attempt * 100000
     shell:
         """
         exec_annotation \
             -o {output.ko_annot} \
+            --format=detail-tsv \
             --cpu={resources.cpus}  \
             --profile {input.profile} \
             --tmp-dir=/tmp/{wildcards.sample}_kofamscan \
@@ -253,3 +254,33 @@ rule kofam_scan:
 
 rule run_kofamscan_bins:
     input: expand("data/kofamscan/{sample}/{bin}_kofam_results.txt", bin = glob_wildcards("data/binning/{sample}/METABAT2/{bin}.fa").bin, sample = binning_example_sample)
+
+
+rule KEGGdecoder:
+    input: 
+        "data/kofamscan/{sample}/{bin}_kofam_results.txt"
+    output: "data/kofamscan/{sample}/{bin}_kegg_decoder_list.tsv"
+    conda: "config/keggdecoder.yaml"
+    shell:
+        """
+        KEGG-decoder --input {input} --output {output} --vizoption static        
+        """
+
+rule bakta:
+    input:
+        genome = "data/binning/{sample}/METABAT2/{bin}.fa"
+    output:
+        dir = directory("data/binning/{sample}/bakta/{bin}")
+    params:
+        db = "data/references/bakta/db"
+    conda: "config/bakta.yaml"
+    log: "logs/bakta/{sample}__{bin}.tsv"
+    benchmark: "benchmarks/bakta/{sample}__{bin}.tsv"
+    resources: cpus=8, mem_mb=32000, time_min=5000, 
+    shell:
+        """
+        bakta --db {params.db} \
+            --output {output.dir} \
+            --threads {resources.cpus} \
+            {input.genome} | tee {log}
+        """
