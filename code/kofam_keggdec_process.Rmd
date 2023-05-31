@@ -1,0 +1,44 @@
+---
+title: "May23-KOFAMscan"
+author: "Paul Den Uyl"
+date: "2023-05-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(here)
+library(dplyr)
+knitr::opts_knit$set(root.dir = here::here("~/projects/2023_metagenomics_working_group")) 
+```
+
+```{r}
+kofamscan_res <- system("ls data/kofamscan/*/*_kofam_results.txt", intern = TRUE) %>%
+  data.frame(path = .) %>% 
+  bind_cols(.,unglue::unglue_data(.$path, "data/kofamscan/{SampleID}/{bin}_kofam_results.txt")) %>% 
+  bind_cols(.,map_df(.$path, file.info)) %>% 
+  filter(mtime > lubridate::mdy("05/01/2023"))
+
+kegg_hits <- map_df(kofamscan_res$path, ~read_tsv(.x) %>% mutate(path=.x), show_col_types=FALSE) %>% 
+  dplyr::rename(sig_nf="#") %>%
+  filter(sig_nf=="*") %>%
+  left_join(kofamscan_res) %>%
+  group_by(bin) %>%
+  mutate(bin=str_replace_all(bin,"_","-"), 
+         genenumber=row_number(),
+         bin=str_glue("{bin}_{genenumber}")) %>%
+  select(bin,KO,SampleID)
+
+sample_list <- kegg_hits$SampleID %>% unique(.)
+
+for(i in sample_list) {
+  kegg_hits %>% 
+    filter(SampleID == i) %>%
+    select(-SampleID) %>%
+    write_tsv(str_glue("data/kofamscan/{i}/keggdec_input.tsv"), col_names = FALSE)
+}
+
+View(kegg_hits)
+```       
+
+

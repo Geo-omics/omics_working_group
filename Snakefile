@@ -219,7 +219,8 @@ rule prodigal_mags:
     input: 
         bin = "data/binning/{sample}/METABAT2/{bin}.fa"
     output:
-        genes = "data/prodigal_mags/{sample}/{bin}.gbk",
+        genes = "data/prodigal_mags/{sample}/{bin}.fasta",
+        gbk = "data/prodigal_mags/{sample}/{bin}.gbk",
         proteins = "data/prodigal_mags/{sample}/{bin}.faa"
     conda: "config/prodigal.yaml"
     log: "logs/progdigal_mags/{sample}__{bin}.log"
@@ -229,12 +230,13 @@ rule prodigal_mags:
             -i {input.bin} \
             -a {output.proteins} \
             -d {output.genes} \
+            -o {output.gbk} \
             1>{log} 2>&1
         """
 
 rule kofam_scan:
     input:
-        genes = rules.prodigal_mags.output.genes,
+        proteins = rules.prodigal_mags.output.proteins,
         profile = "/geomicro/data2/kiledal/GLAMR/data/reference/kegg/kofamscan/profiles",
         ko_list = "/geomicro/data2/kiledal/GLAMR/data/reference/kegg/kofamscan/ko_list"
     output:
@@ -249,7 +251,7 @@ rule kofam_scan:
             --cpu={resources.cpus}  \
             --profile {input.profile} \
             --tmp-dir=/tmp/{wildcards.sample}_kofamscan \
-            --ko-list {input.ko_list} {input.genes}
+            --ko-list {input.ko_list} {input.proteins}
         """
 
 rule run_kofamscan_bins:
@@ -258,13 +260,16 @@ rule run_kofamscan_bins:
 
 rule KEGGdecoder:
     input: 
-        "data/kofamscan/{sample}/{bin}_kofam_results.txt"
-    output: "data/kofamscan/{sample}/{bin}_kegg_decoder_list.tsv"
-    conda: "config/keggdecoder.yaml"
+        "data/kofamscan/{sample}/keggdec_input.tsv"
+    output: "data/kofamscan/{sample}/kegg_decoder_list.txt"
+    conda: "keggdecoder"
     shell:
         """
         KEGG-decoder --input {input} --output {output} --vizoption static        
         """
+
+rule run_KEGGdecoder:
+    input: expand("data/kofamscan/{sample}/kegg_decoder_list.txt", sample = binning_example_sample)
 
 rule bakta:
     input:
