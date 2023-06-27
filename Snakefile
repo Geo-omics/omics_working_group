@@ -4,7 +4,6 @@ import snakemake.io
 from glob import glob
 
 sample_list = glob_wildcards("data/reads/{sample}__fwd.fastq.gz").sample
-
 binning_samples = glob_wildcards("data/reads_for_binning/{sample}_{read_dir_coverm}.fastq.gz").sample
 
 binning_example_sample = "samp_447" # I've only been binning one example sample for the working group, which I'll use below for the appropriate binning steps rather than all of the samples from  binning_samples or sample_list
@@ -289,3 +288,30 @@ rule bakta:
             --threads {resources.cpus} \
             {input.genome} | tee {log}
         """
+
+
+rule mmseqs_cluster:
+    input: "data/clustering/{gene}.fasta"
+    output: "data/clustering/{gene}_rep_seq.fasta"
+    params:
+        min_identity = 0.8,
+        coverage = 0.8,
+        output_directory = "data/clustering"
+    conda: "config/mmseqs.yaml"
+    log: "logs/mmseqs_cluster/{gene}.log"
+    benchmark: "benchmarks/mmseqs_cluster/{gene}.txt"
+    resources: cpus=8, mem_mb=12000, time_min=200
+    shell:
+        """
+        mmseqs easy-cluster \
+            {input} \
+            {params.output_directory}/{wildcards.gene} \
+            /tmp/ \
+            --cov-mode 1 \
+            --min-seq-id {params.min_identity} \
+            -c {params.coverage} \
+            --threads {resources.cpus}
+        """
+
+
+

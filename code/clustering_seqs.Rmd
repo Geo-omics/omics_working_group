@@ -1,0 +1,29 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = here::here("~/projects/2023_metagenomics_working_group/"))
+library(tidyverse)
+```
+
+
+```{r}
+unclustered_catalase_genes <- Biostrings::readDNAStringSet("~/projects/2023_metagenomics_working_group/data/clustering/catalase.fasta") %>% 
+  data.frame(header = names(.), seq = .,row.names = NULL)
+```
+
+
+
+```{r}
+cluster_membership <- read_tsv("data/clustering/catalase_cluster.tsv", col_names = c("cluster", "seq"))
+
+
+clusters <- cluster_membership %>% 
+  select(cluster) %>% 
+  distinct()
+
+
+```
+
