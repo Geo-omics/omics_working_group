@@ -1,0 +1,110 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = here::here("~/projects/2023_metagenomics_working_group/"))
+library(ape)
+library(phytools)
+library(ggtree)
+library(DECIPHER)
+```
+
+This document introduces some ways to work with and compare trees in R.
+
+## Plotting trees
+```{r}
+# Read in the tree
+tree <- read.tree("data/trees/core_gene_alignment_filtered.tre")
+
+# Plot tree with node numbers
+ggtree(tree) + 
+  geom_text(aes(label=node), hjust=-.3) +
+  geom_tiplab()
+
+# Set the root node based on plot with node labels
+rooted_tree <- ape::root(tree, node = 324)
+
+# Plot the newly rooted tree
+ggtree(rooted_tree) + 
+  geom_text(aes(label=node), hjust=-.3) +
+  geom_tiplab()
+
+ggsave("outputs/example_tree.pdf", width = 5, height = 10, scale = 5, limitsize = FALSE) # Save the tree
+
+# Lets create some example metadata extracted from node labels
+genome_info <- tree$tip.label %>% 
+  data.frame(genomes = .) %>% 
+  mutate(WLECC = str_detect(genomes, "^LE"))
+
+# Plot tree using aesthetics mapped to metadata table
+ggtree(rooted_tree, aes(color = WLECC) ) %<+% genome_info +
+  geom_tiplab()
+
+ggsave("outputs/example_tree_w_colors.pdf", width = 5, height = 10, scale = 5, limitsize = FALSE) # Save the tree
+```
+
+Subsetting trees
+```{r}
+# Create a list of the WLECC genomes 
+wlecc_genomes <- genome_info %>% 
+  filter(WLECC == TRUE) %>% 
+  pull(genomes)
+
+# Subset the tree to only the WLECC genomes
+subset_tree <- ape::keep.tip(rooted_tree, wlecc_genomes)
+
+# Plot the WLECC genome tree
+ggtree(subset_tree)
+```
+## Comparing trees
+
+Here we'll read in two Microcystis trees built from different genes (trees from the Microcystis marker gene paper)
+```{r}
+tree1 <- read.tree("data/trees/lgt__516.afa.treefile") 
+
+# Remove some extra characters from tip labels (added by Panaroo) to make them consistent across trees
+tree1$tip.label <- tree1$tip.label %>% 
+  str_remove("_[0-9]*_[0-9]*_[0-9]*$") %>% 
+  str_remove("_[0-9]*_refound.*")
+
+tree2 <- read.tree("data/trees/group_14174__1522.afa.treefile") 
+
+# Cleanup tip labels for tree2
+tree2$tip.label <- tree2$tip.label %>%
+  str_remove("_[0-9]*_[0-9]*_[0-9]*$") %>% 
+    str_remove("_[0-9]*_refound.*")
+
+# Determine tree overlap
+trees_to_compare <- cophylo(tree1, tree2, rotate = TRUE)
+
+# Get colors to use for plotting
+palette <- randomcoloR::distinctColorPalette(length(tree1$tip.label))
+
+# Open a pdf to save results to
+pdf(file = "~/example_tree_comparison.pdf", width = 8, height = 12, pointsize = 4)
+
+par(lend=3)
+
+# Plot tree comparison with a few custom aesthetics specified
+plot(trees_to_compare,
+     link.col=palette,
+     link.lwd=4,
+     link.type="curved",
+     link.lty="solid",
+     fsize=c(0.8,0.8))
+
+dev.off() # Close the plot file
+```
+
+Compare trees using distance metrics
+```{r}
+TreeDist::RobinsonFoulds(tree1 = tree1, tree2 = tree2)
+
+TreeDist::ClusteringInfoDist(tree1 = tree1, tree2 = tree2)
+```
+
+
+
+

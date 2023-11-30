@@ -1,0 +1,28 @@
+---
+title: "KofamScan"
+author: "Anders Kiledal"
+date: "2023-04-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = here::here("~/projects/2023_metagenomics_working_group"))
+library(tidyverse)
+```
+
+```{r}
+kofamscan_res_paths <- system("ls data/kofamscan/samp_447/metabat2.75_kofam_results.txt", intern = TRUE)
+
+cols <- c("sig","gene_name", "KO", "thrshld", "score","e_value","KO_definition")
+
+kofam_hits <- kofamscan_res_paths[1] %>% 
+  read_tsv(col_names = cols, skip = 1) %>% 
+  filter(sig == "*")
+
+kofam_formatted_for_keggdecoder <- kofam_hits %>% 
+  mutate(ko_id = str_glue("bin75_{row_number()}")) %>% 
+  select(ko_id, KO) %>% 
+  write_tsv("data/kofamscan/samp_447/keggdecoder_input.tsv",col_names = FALSE)
+
+```
+

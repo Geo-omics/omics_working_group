@@ -1,0 +1,135 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = here::here("~/projects/2023_metagenomics_working_group/"))
+library(tidyverse)
+library(vegan)
+pg <- DBI::dbConnect(RPostgres::Postgres(),dbname = "glamr_data", host = "localhost", port = "5432", user = "glamr_admin", password = "glamr2023")
+```
+
+Read in metadata
+```{r}
+metadata <- tbl(pg, "glamr_samples") %>% 
+  filter(StudyID == "set_37") %>% 
+  collect()
+
+abund <- data.table::fread("data/16S_data/geomicro_field_samples_long.tsv",nThread = 8)
+```
+Get count table
+```{r}
+simple_abund <- abund %>% 
+  select(sample, ASV, rel_abund) %>% 
+  pivot_wider(names_from = "sample",
+              values_from = "rel_abund") %>% 
+  column_to_rownames("ASV")
+```
+
+Calculate alpha diversity
+```{r}
+
+vegan_abund <- simple_abund %>% 
+  t()
+
+shannon_diversity <- vegan::diversity(vegan_abund)
+
+shannon_df <- shannon_diversity %>% 
+  data.frame(shannon = ., 
+            SampleName = names(.)) %>% 
+  mutate(SampleName = str_replace(SampleName, "-", "_")) %>% 
+  left_join(metadata)
+  
+shannon_df %>% 
+  ggplot(aes(date_same_year, shannon)) +
+  geom_point()
+
+# Calc simpin
+simpson_diversity <- vegan::diversity(vegan_abund,index = "invsimpson")
+
+simpson_df <- simpson_diversity %>% 
+  data.frame(invsimpson = ., 
+            SampleName = names(.)) %>% 
+  mutate(SampleName = str_replace(SampleName, "-", "_"))
+
+combined_diversity <- shannon_df %>% 
+  left_join(simpson_df) %>% 
+  pivot_longer(c(shannon, invsimpson), names_to = "metric", values_to = "diversity")
+
+combined_diversity %>% 
+  ggplot(aes(date_same_year, diversity)) +
+  geom_point() +
+  facet_grid(~metric, scales = "free_y")
+
+alpha_div_lm <- shannon_df %>% 
+  filter(!is.na(temp) & !is.na(date_same_year) & !is.na(part_microcyst)) %>% 
+  lm(shannon ~ temp + date_same_year + part_microcyst,data = .) %>% 
+  broom::tidy()
+
+
+group1 <- shannon_df %>% 
+  filter(!is.na(temp) & !is.na(date_same_year) & !is.na(part_microcyst),
+         row_number() < 379/2) 
+
+group2 <- shannon_df %>% 
+  filter(!is.na(temp) & !is.na(date_same_year) & !is.na(part_microcyst),
+         row_number() > 379/2) 
+
+(t_test_res <- t.test(group1$shannon, group2$shannon))
+
+```
+
+
+Beta diversity statistics
+```{r}
+sample_dists <- simple_abund %>% 
+  t() %>% 
+  vegan::vegdist(method = "bray")
+
+sample_dists_df <- sample_dists %>% 
+  as.matrix() %>% 
+  as.data.frame()
+
+sample_similarity_df <- 1-sample_dists_df
+```
+
+```{r}
+nmds <- sample_dists %>% 
+    monoMDS()
+
+nmds_coords <- nmds$points %>% 
+  as.data.frame() %>% 
+  rownames_to_column("SampleName") %>% 
+  mutate(SampleName = str_replace(SampleName, "-", "_")) %>% 
+  left_join(metadata)
+
+nmds$stress
+
+nmds_coords %>% 
+  ggplot(aes(MDS1, MDS2, color = temp)) +
+  geom_point() +
+  scale_color_viridis_c()
+
+clean_metadata <- metadata %>% 
+  select(SampleName, temp, part_microcyst, chlorophyl,Nitrate_Nitrite) %>% 
+  filter(!is.na(SampleName)) %>% 
+  column_to_rownames("SampleName") %>% 
+  .[nmds_coords$SampleName, ]
+
+fit <- envfit(nmds, clean_metadata,na.rm=TRUE)
+
+plot(nmds)
+plot(fit)
+
+envfit_df <- fit$vectors$arrows %>% 
+  bind_rows(p_value = fit$vectors$pvals)
+```
+
+
+```{r}
+perm_res <- vegan::adonis2(sample_dists ~ temp + chlorophyl + Nitrate_Nitrite + part_microcyst,data = clean_metadata,permutations = 100,na.action = na.exclude,by = "margin")
+```
+
+
+

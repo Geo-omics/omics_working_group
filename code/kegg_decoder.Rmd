@@ -1,0 +1,19 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = here::here("~/projects/2023_metagenomics_working_group"))
+library(tidyverse)
+```
+
+```{r}
+kofamscan_res <- system("ls data/kofamscan/*/*_kofam_results.txt", intern = TRUE) %>% 
+  data.frame(path = .) %>% 
+  bind_cols(.,unglue::unglue_data(.$path, "data/kofamscan/{SampleID}/{bin}_kofam_results.txt"))
+
+kegg_hits <- map_df(kofamscan_res$path, read_tsv,show_col_types = FALSE,.id = "path")
+
+```
+
