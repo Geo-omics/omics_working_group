@@ -1,0 +1,33 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = here::here("~/projects/2023_metagenomics_working_group/"))
+library(tidyverse)
+
+```
+
+Example of linking assemblies with sample names to one of your directories
+```{r}
+# List the assemblies
+assemblies <- Sys.glob("/geomicro/data2/kiledal/GLAMR/data/omics/metagenomes/*/assembly/megahit_noNORM/final.contigs.renamed.fa")
+
+# Create a table of the assemblies, SampleIDs, and the path to link to
+assembly_table <- data.frame(assembly_path = assemblies) %>% 
+  unglue::unglue_unnest(data = ., 
+                        col = assembly_path,
+                        patterns = "/geomicro/data2/kiledal/GLAMR/data/omics/metagenomes/{SampleID}/assembly/megahit_noNORM/final.contigs.renamed.fa",remove = FALSE) %>% 
+  mutate(link_path = str_glue("~/projects/2023_metagenomics_working_group/assemblies/{SampleID}_contigs.renamed.fasta"))
+  
+#Create the directory for the links
+assembly_table$link_path %>% 
+  dirname() %>% 
+  unique() %>% 
+  fs::dir_create(recurse = TRUE)
+
+# Link the assemblies
+fs::link_create(assembly_table$assembly_path, assembly_table$link_path)
+```
+
