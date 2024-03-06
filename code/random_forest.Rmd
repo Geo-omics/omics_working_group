@@ -1,0 +1,95 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup}
+library(tidyverse)
+library(tidymodels)
+library(ALDEx2)
+library(vip)
+```
+
+
+## Random forest
+
+### Load in data
+```{r}
+abundance_data <- read_tsv("~/projects/20240301_Xianzhe_resistant_starch_stats/all_species1.txt")
+
+# Remove group information for random forest modeling
+for_rf <- abundance_data %>% 
+  dplyr::select(-butyrate)
+
+# Matrix with just abundance information
+just_abund <- abundance_data %>% 
+  column_to_rownames("sample") %>% 
+  dplyr::select(-butyrate, -group)
+
+# Pull out sample metadata
+metadata <- abundance_data %>% 
+  dplyr::select(sample, group, butyrate)
+
+# 
+taxonomy <- read_tsv("~/projects/20240301_Xianzhe_resistant_starch_stats/species") %>% 
+  mutate(OTU = str_glue("OTU{row_number()}")) %>% 
+  dplyr::select(OTU, Taxonomy)
+```
+
+### Preprocess the data
+```{r}
+community_boot <- bootstraps(for_rf)
+
+preprocess_plan <- recipe(group ~ ., data = for_rf) %>% 
+  update_role(sample,new_role = "Id") %>% 
+  step_zv(all_predictors()) %>% # scale the columns
+  step_normalize(all_predictors())
+
+community_prep <- prep(preprocess_plan)
+```
+
+### Set up model formula
+```{r}
+rf_spec <- rand_forest(trees = 1000) %>% 
+  set_mode("classification") %>% 
+  set_engine("ranger")
+
+community_rf_flow <- workflow() %>% 
+  add_recipe(preprocess_plan) %>% 
+  add_model(rf_spec)
+
+```
+
+### Run the model across the bootstraps
+```{r}
+community_rf_res <- fit_resamples(
+  community_rf_flow,
+  resamples = community_boot,
+  control = control_resamples(save_pred = TRUE, 
+                              verbose = TRUE)
+)
+```
+
+Collect metrics
+```{r}
+community_rf_res %>% 
+  collect_metrics()
+```
+
+### Run random forest with variable importance scores
+```{r}
+rf_w_vip <- rf_spec %>% 
+  set_engine("ranger", importance = "permutation") %>% 
+  fit(group ~ .,
+      data = juice(community_prep) %>% dplyr::select(-c(sample))) #%>%
+  #vip(geom = "point")
+  
+  
+variable_importance <- rf_w_vip[["fit"]][["variable.importance"]] %>% 
+  data.frame(importance = ., OTU = names(.)) %>% 
+  left_join(taxonomy) %>% 
+  arrange(desc(importance))
+  
+```
+
+
