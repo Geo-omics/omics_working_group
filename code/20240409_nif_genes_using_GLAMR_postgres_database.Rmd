@@ -1,0 +1,103 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup}
+pg <- DBI::dbConnect(RPostgres::Postgres(),dbname = "glamr_data", host = "localhost", port = "5432", user = "glamr_admin", password = "glamr2023")
+```
+
+
+## Identifying nitrogen fixers in Lake Erie
+
+Create pointers to tables in the database
+```{r}
+glamr_samples <- tbl(pg, "glamr_samples") 
+kofam_scan_hits <- tbl(pg, "kofam_scan")
+bin_membership <- tbl(pg, "contig_bin_membership")
+gene_abundance <- tbl(pg, "gene_abundance")
+gtdb <- tbl(pg, "GTDB")
+checkm <- tbl(pg, "checkm")
+```
+
+
+```{r}
+# Identify metagenomes from Lake Erie
+lake_erie_samples <- glamr_samples %>% 
+  filter(geo_loc_name == "Lake Erie",
+         sample_type == "metagenome")
+
+# Get genes with KOFamScan hits to three nif genes (nifD, nifH, nifK)
+nif_gene_hits <- kofam_scan_hits %>% 
+  filter(sig == TRUE,
+         ko %in% local(c("K02588", "K02591", "K02586")),
+         sample %in% local(lake_erie_samples$SampleID)) %>% 
+  left_join(gene_abundance) %>% # also collect information about abundance of the genes and which contigs they are on
+  collect()
+
+# Which bins are these genes in?
+bins_w_nif_genes <- bin_membership %>% # this table lists which contigs are in which bins
+  filter(contig %in% local(nif_gene_hits$contig)) %>%  # filter for contigs that had gene hits
+  left_join(gtdb %>% select(bin, classification)) %>%  # add on gtdb information for the bins
+  left_join(checkm %>% select(bin, Completeness, Contamination)) %>% # and checkm information
+  collect() %>% # collect the results
+  left_join(nif_gene_hits) # join with the results from above
+
+# Essentially adding taxonomy from bins to the original nif_gene_hits table ()
+nif_gene_hits_w_bin_id <- nif_gene_hits %>% 
+  left_join(bins_w_nif_genes %>% select(contig, classification)) %>% 
+  left_join(glamr_samples %>% select(sample = "SampleID", collection_date, date_same_year, year, lat, lon) %>% collect()) %>% 
+  mutate(short_tax = case_when(str_detect(classification, "Dolichospermum") ~ "Dolicospermum",
+                               str_detect(classification, "Bradyrhizobium") ~ "Bradyrhizobium"))
+
+# Let's plot the gene abundance over time colored by which organism is expected to encode it
+nif_gene_hits_w_bin_id %>% 
+  filter(!is.na(short_tax)) %>% 
+  ggplot(aes(date_same_year, tpm, color = short_tax)) +
+  geom_point()
+
+# How many *unique* nif genes in each bin?
+num_nif_genes <- bins_w_nif_genes %>% 
+  group_by(bin, ko) %>%
+  slice_max(order_by = tpm, n = 1, with_ties = FALSE) %>% # to only count each ko once if there are multiple copies per bin
+  group_by(bin) %>% 
+  summarize(n_nif_genes = n())
+
+# A little key of ko to ko name
+ko_key <- data.frame(ko = c("K02588", "K02591", "K02586"),
+                     ko_name = c("nifH", "nifK", "nifD"))
+
+# How many times was each ko observed?
+nif_gene_hits %>% 
+  left_join(ko_key) %>% 
+  group_by(ko, ko_name) %>% 
+  summarise(count = n())
+```
+
+Is there a different spatial distribution of these nif gene encoding organisms?
+
+```{r}
+nif_gene_hits_w_bin_id %>% 
+  filter(!is.na(short_tax)) %>% 
+  ggplot(aes(lon, lat, color = short_tax)) +
+  geom_jitter(width = .01, height = .01)
+```
+
+Are there differences in nif encoding orgnaisms by year?
+```{r}
+nif_gene_hits_w_bin_id %>% 
+  filter(!is.na(short_tax)) %>% 
+  ggplot(aes(as.factor(year), tpm, color = short_tax)) +
+  geom_boxplot()
+```
+
+
+Are there differences in nif encoding orgnaisms by study?
+```{r}
+nif_gene_hits_w_bin_id %>% 
+  filter(!is.na(short_tax)) %>% 
+  left_join(glamr_samples %>% select(sample = "SampleID", StudyID) %>% collect()) %>% 
+  ggplot(aes(StudyID, tpm, color = short_tax)) +
+  geom_boxplot()
+```
+
