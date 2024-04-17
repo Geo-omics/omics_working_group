@@ -1,0 +1,241 @@
+HOG	OG	Gene Tree Parent Clade	LE17_10A	LE17_20C	LE18_22.4.newname	LE19_10.1C	LE19_114.1A	LE19_12.1	LE19_131.1	LE19_195.1	LE19_196.1	LE19_197	LE19_251	LE19_281	LE19_338.1	LE19_388.1C	LE19_4.1A	LE19_41.2	LE19_55.1	LE19_8.1	LE19_84.1	LE19_98.1
+N14.HOG0000000	OG0000000	n4																			O9324_10775|biosynthetic	
+N14.HOG0000001	OG0000000	n15													O9326_00420|biosynthetic	ctg398_7|biosynthetic						
+N14.HOG0000002	OG0000000	n27													O9326_00665|biosynthetic	ctg188_2|biosynthetic						
+N14.HOG0000003	OG0000000	n31													O9326_00415|biosynthetic	ctg398_8|biosynthetic						
+N14.HOG0000004	OG0000000	n44																			O9324_10760|biosynthetic	
+N14.HOG0000005	OG0000000	n47														ctg188_3|biosynthetic						
+N14.HOG0000006	OG0000000	n55													O9326_23810|biosynthetic	ctg122_12|biosynthetic						
+N14.HOG0000007	OG0000000	n73													O9326_11030|biosynthetic, O9326_10340|biosynthetic	ctg160_17|biosynthetic					O9324_18520|biosynthetic	
+N14.HOG0000008	OG0000000	n93																			O9324_10770|biosynthetic	
+N14.HOG0000009	OG0000000	n102													O9326_22475|biosynthetic	ctg148_14|biosynthetic					O9324_10000|biosynthetic	
+N14.HOG0000010	OG0000000	n125													O9326_22480|biosynthetic-additional						O9324_09995|biosynthetic-additional	
+N14.HOG0000011	OG0000000	n136														ctg35_17|biosynthetic					O9324_11520|biosynthetic	
+N14.HOG0000012	OG0000000	n151																			O9324_10790|biosynthetic	
+N14.HOG0000013	OG0000000	n156														ctg35_15|biosynthetic					O9324_11530|biosynthetic	
+N14.HOG0000014	OG0000000	n166														ctg35_23|biosynthetic					O9324_11490|biosynthetic	
+N14.HOG0000015	OG0000000	n173													O9326_06150|biosynthetic	ctg148_18|biosynthetic					O9324_21720|biosynthetic	
+N14.HOG0000016	OG0000000	n204														ctg148_15|biosynthetic						
+N14.HOG0000017	OG0000001	n3													O9326_16460|biosynthetic	ctg112_4|biosynthetic					O9324_19140|biosynthetic	
+N14.HOG0000018	OG0000001	n16																			O9324_10480|biosynthetic, O9324_19120|biosynthetic	
+N14.HOG0000019	OG0000001	n24													O9326_16480|biosynthetic	ctg112_8|biosynthetic					O9324_11190|biosynthetic, O9324_10475|biosynthetic	
+N14.HOG0000020	OG0000002	n1													O9326_22465|transport	ctg148_11|transport						
+N14.HOG0000021	OG0000002	n21														ctg35_12|transport					O9324_11540|transport	
+N14.HOG0000022	OG0000002	n31																			O9324_10755|transport	
+N14.HOG0000023	OG0000003	n1													O9326_00425|biosynthetic	ctg398_6|biosynthetic						
+N14.HOG0000024	OG0000003	n14													O9326_03840|biosynthetic	ctg35_25|biosynthetic					O9324_03960|biosynthetic	
+N14.HOG0000025	OG0000004	n7													O9326_07260|transport	ctg194_10|transport						
+N14.HOG0000026	OG0000005	n9													O9326_06160|biosynthetic	ctg148_20|biosynthetic					O9324_21710|biosynthetic	
+N14.HOG0000027	OG0000006	n2													O9326_10025|hypothetical	ctg304_16|hypothetical						
+N14.HOG0000028	OG0000006	n13														ctg4_26|hypothetical					O9324_19165|hypothetical	
+N14.HOG0000029	OG0000007	n2																			O9324_10810|biosynthetic-additional	
+N14.HOG0000030	OG0000007	n13														ctg160_4|regulatory						
+N14.HOG0000031	OG0000008	n14																			O9324_11525|biosynthetic-additional	
+N14.HOG0000032	OG0000009	n7													O9326_06155|hypothetical	ctg148_19|hypothetical						
+N14.HOG0000033	OG0000009	n11																			O9324_21715|hypothetical	
+N14.HOG0000034	OG0000010	n0													O9326_10295|other	ctg160_8|other					O9324_21645|other	
+N14.HOG0000035	OG0000011	n0													O9326_10300|biosynthetic-additional	ctg160_9|biosynthetic-additional					O9324_16780|biosynthetic-additional	
+N14.HOG0000036	OG0000012	n0													O9326_10305|biosynthetic	ctg160_10|biosynthetic					O9324_16775|biosynthetic	
+N14.HOG0000037	OG0000013	n0													O9326_02715|biosynthetic	ctg221_16|biosynthetic					O9324_03715|biosynthetic	
+N14.HOG0000038	OG0000014	n2														ctg4_13|biosynthetic					O9324_06505|biosynthetic	
+N14.HOG0000039	OG0000015	n0													O9326_10310|hypothetical	ctg160_11|hypothetical					O9324_16770|hypothetical	
+N14.HOG0000040	OG0000016	n0													O9326_02720|hypothetical	ctg221_17|hypothetical					O9324_03720|hypothetical	
+N14.HOG0000041	OG0000017	n0													O9326_02725|hypothetical	ctg221_18|hypothetical					O9324_03725|hypothetical	
+N14.HOG0000042	OG0000018	n0													O9326_09990|hypothetical	ctg304_7|hypothetical					O9324_00085|hypothetical	
+N14.HOG0000043	OG0000019	n0													O9326_09970|biosynthetic	ctg304_3|biosynthetic					O9324_00065|biosynthetic	
+N14.HOG0000044	OG0000020	n0													O9326_10005|hypothetical	ctg304_12|hypothetical					O9324_00100|hypothetical	
+N14.HOG0000045	OG0000021	n0													O9326_09995|hypothetical	ctg304_8|hypothetical					O9324_00090|hypothetical	
+N14.HOG0000046	OG0000022	n0													O9326_09965|hypothetical	ctg304_2|hypothetical					O9324_00060|hypothetical	
+N14.HOG0000047	OG0000023	n0													O9326_10290|hypothetical	ctg160_7|hypothetical						
+N14.HOG0000048	OG0000024	n8														ctg398_24|hypothetical						
+N14.HOG0000049	OG0000024	n10													O9326_10350|hypothetical	ctg160_19|hypothetical						
+N14.HOG0000050	OG0000025	n0													O9326_02710|hypothetical	ctg221_15|hypothetical					O9324_03710|hypothetical	
+N14.HOG0000051	OG0000026	n0													O9326_02730|biosynthetic-additional	ctg221_19|biosynthetic-additional					O9324_03730|biosynthetic-additional	
+N14.HOG0000052	OG0000027	n0													O9326_10015|hypothetical	ctg304_14|hypothetical					O9324_00110|hypothetical	
+N14.HOG0000053	OG0000028	n0													O9326_10010|hypothetical	ctg304_13|hypothetical					O9324_00105|hypothetical	
+N14.HOG0000054	OG0000029	n0													O9326_10285|other	ctg160_6|other						
+N14.HOG0000055	OG0000030	n0													O9326_02735|hypothetical	ctg221_20|hypothetical					O9324_03735|hypothetical	
+N14.HOG0000056	OG0000031	n2														ctg188_4|hypothetical, ctg188_5|hypothetical						
+N14.HOG0000057	OG0000031	n6																			O9324_18505|biosynthetic-additional	
+N14.HOG0000058	OG0000031	n8																			O9324_18500|biosynthetic-additional	
+N14.HOG0000059	OG0000031	n9																			O9324_18495|biosynthetic-additional	
+N14.HOG0000060	OG0000032	n3														ctg398_14|transport						
+N14.HOG0000061	OG0000032	n13														ctg122_23|transport						
+N14.HOG0000062	OG0000033	n0													O9326_04750|other	ctg398_12|other						
+N14.HOG0000063	OG0000034	n0													O9326_10315|hypothetical	ctg160_12|hypothetical					O9324_16765|hypothetical	
+N14.HOG0000064	OG0000035	n0													O9326_02740|hypothetical	ctg221_21|hypothetical					O9324_03740|hypothetical	
+N14.HOG0000065	OG0000036	n0													O9326_02745|hypothetical	ctg221_22|hypothetical					O9324_03745|hypothetical	
+N14.HOG0000066	OG0000037	n0													O9326_16465|hypothetical	ctg112_5|hypothetical					O9324_19135|hypothetical	
+N14.HOG0000067	OG0000039	n5													O9326_10955|hypothetical							
+N14.HOG0000068	OG0000039	n10														ctg398_20|biosynthetic-additional						
+N14.HOG0000069	OG0000040	n6														ctg398_18|hypothetical						
+N14.HOG0000070	OG0000040	n10														ctg398_19|hypothetical						
+N14.HOG0000071	OG0000041	n0														ctg398_15|transport						
+N14.HOG0000072	OG0000042	n0													O9326_04745|biosynthetic-additional	ctg398_11|biosynthetic-additional						
+N14.HOG0000073	OG0000043	n0													O9326_04740|biosynthetic	ctg398_10|biosynthetic						
+N14.HOG0000074	OG0000044	n0													O9326_00410|biosynthetic-additional	ctg398_9|biosynthetic-additional						
+N14.HOG0000075	OG0000045	n0													O9326_00430|biosynthetic-additional	ctg398_5|biosynthetic-additional						
+N14.HOG0000076	OG0000046	n0													O9326_00435|hypothetical	ctg398_4|hypothetical						
+N14.HOG0000077	OG0000047	n0													O9326_06140|biosynthetic-additional, O9326_03835|biosynthetic-additional	ctg148_16|biosynthetic-additional, ctg35_24|biosynthetic-additional					O9324_03955|biosynthetic-additional	
+N14.HOG0000078	OG0000048	n0													O9326_02705|biosynthetic-additional	ctg221_14|biosynthetic-additional					O9324_03705|biosynthetic-additional	
+N14.HOG0000079	OG0000049	n0													O9326_02750|biosynthetic-additional	ctg221_23|biosynthetic-additional					O9324_03750|biosynthetic-additional	
+N14.HOG0000080	OG0000050	n0													O9326_16470|hypothetical	ctg112_6|hypothetical					O9324_19130|hypothetical	
+N14.HOG0000081	OG0000051	n0													O9326_00440|hypothetical	ctg398_3|hypothetical						
+N14.HOG0000082	OG0000052	n3													O9326_16475|hypothetical	ctg112_7|hypothetical					O9324_19125|hypothetical	
+N14.HOG0000083	OG0000053	n0														ctg398_16|other						
+N14.HOG0000084	OG0000054	n0														ctg398_13|hypothetical						
+N14.HOG0000085	OG0000055	n0													O9326_00445|transport	ctg398_2|transport						
+N14.HOG0000086	OG0000056	n0													O9326_10280|biosynthetic-additional	ctg160_5|biosynthetic-additional						
+N14.HOG0000087	OG0000057	n0													O9326_10320|other	ctg160_13|other					O9324_16760|hypothetical	
+N14.HOG0000088	OG0000058	n0													O9326_10375|hypothetical	ctg160_24|hypothetical					O9324_18460|hypothetical	
+N14.HOG0000089	OG0000059	n0													O9326_10380|transport	ctg160_25|transport					O9324_18465|transport	
+N14.HOG0000090	OG0000060	n0													O9326_02755|hypothetical	ctg221_24|hypothetical					O9324_03755|hypothetical	
+N14.HOG0000091	OG0000061	n0														ctg122_14|hypothetical						
+N14.HOG0000092	OG0000062	n1														ctg35_14|biosynthetic-additional, ctg35_13|biosynthetic-additional					O9324_11535|biosynthetic-additional	
+N14.HOG0000093	OG0000063	n0														ctg398_17|hypothetical						
+N14.HOG0000094	OG0000064	n0																			O9324_11145|hypothetical	
+N14.HOG0000095	OG0000065	n0													O9326_16485|hypothetical	ctg112_9|hypothetical					O9324_11185|hypothetical	
+N14.HOG0000096	OG0000066	n2														ctg160_34|hypothetical						
+N14.HOG0000097	OG0000066	n6														ctg4_5|hypothetical						
+N14.HOG0000098	OG0000067	n0														ctg35_10|hypothetical						
+N14.HOG0000099	OG0000068	n0													O9326_22455|hypothetical	ctg148_9|hypothetical						
+N14.HOG0000100	OG0000069	n0													O9326_22460|hypothetical	ctg148_10|hypothetical						
+N14.HOG0000101	OG0000070	n0																			O9324_10780|biosynthetic	
+N14.HOG0000102	OG0000075	n0													O9326_10330|hypothetical	ctg160_15|hypothetical						
+N14.HOG0000103	OG0000076	n0													O9326_11020|hypothetical, O9326_10370|hypothetical	ctg160_23|hypothetical						
+N14.HOG0000104	OG0000077	n0														ctg221_12|hypothetical					O9324_03695|hypothetical	
+N14.HOG0000105	OG0000078	n0														ctg221_13|hypothetical					O9324_03700|hypothetical	
+N14.HOG0000106	OG0000080	n0													O9326_22445|hypothetical	ctg148_7|hypothetical						
+N14.HOG0000107	OG0000081	n0													O9326_06170|biosynthetic-additional	ctg148_21|biosynthetic-additional					O9324_21700|biosynthetic-additional	
+N14.HOG0000108	OG0000082	n0													O9326_06175|biosynthetic-additional	ctg148_22|biosynthetic-additional					O9324_21695|biosynthetic-additional	
+N14.HOG0000109	OG0000083	n0													O9326_18770|hypothetical	ctg4_14|hypothetical					O9324_06500|hypothetical	
+N14.HOG0000110	OG0000084	n0													O9326_18765|hypothetical	ctg4_17|hypothetical					O9324_06495|hypothetical	
+N14.HOG0000111	OG0000085	n4													O9326_07110|hypothetical	ctg3_2|other						
+N14.HOG0000112	OG0000087	n0																			O9324_18475|hypothetical	
+N14.HOG0000113	OG0000088	n0														ctg188_6|biosynthetic-additional						
+N14.HOG0000114	OG0000094	n0													O9326_11025|hypothetical, O9326_10345|hypothetical	ctg160_18|hypothetical						
+N14.HOG0000115	OG0000095	n0													O9326_22450|hypothetical	ctg148_8|hypothetical						
+N14.HOG0000116	OG0000096	n0														ctg4_18|hypothetical					O9324_06490|hypothetical	
+N14.HOG0000117	OG0000097	n0														ctg4_19|hypothetical					O9324_06485|hypothetical	
+N14.HOG0000118	OG0000098	n0														ctg4_20|hypothetical					O9324_06480|hypothetical	
+N14.HOG0000119	OG0000099	n0														ctg4_21|hypothetical					O9324_06475|hypothetical	
+N14.HOG0000120	OG0000102	n3														ctg122_6|hypothetical						
+N14.HOG0000121	OG0000106	n0														ctg221_10|hypothetical					O9324_03685|hypothetical	
+N14.HOG0000122	OG0000107	n0														ctg221_11|hypothetical					O9324_03690|hypothetical	
+N14.HOG0000123	OG0000108	n0																			O9324_11160|hypothetical	
+N14.HOG0000124	OG0000109	n0													O9326_16490|hypothetical	ctg112_10|hypothetical					O9324_11180|hypothetical	
+N14.HOG0000125	OG0000110	n0													O9326_16495|hypothetical	ctg112_12|hypothetical					O9324_11175|hypothetical	
+N14.HOG0000126	OG0000113	n0														ctg4_22|hypothetical					O9324_06470|hypothetical	
+N14.HOG0000127	OG0000114	n0														ctg35_22|hypothetical					O9324_11495|hypothetical	
+N14.HOG0000128	OG0000115	n0														ctg35_21|hypothetical					O9324_11500|hypothetical	
+N14.HOG0000129	OG0000116	n0														ctg35_20|hypothetical					O9324_11505|hypothetical	
+N14.HOG0000130	OG0000117	n0														ctg35_19|biosynthetic-additional					O9324_11510|biosynthetic-additional	
+N14.HOG0000131	OG0000118	n0														ctg35_18|hypothetical					O9324_11515|hypothetical	
+N14.HOG0000132	OG0000119	n0													O9326_10000|other	ctg304_11|other					O9324_00095|other	
+N14.HOG0000133	OG0000121	n0													O9326_07265|hypothetical	ctg194_11|hypothetical						
+N14.HOG0000134	OG0000122	n0														ctg398_23|transport						
+N14.HOG0000135	OG0000123	n0														ctg398_22|hypothetical						
+N14.HOG0000136	OG0000124	n0														ctg398_21|hypothetical						
+N14.HOG0000137	OG0000125	n0													O9326_11035|hypothetical, O9326_10335|hypothetical	ctg160_16|hypothetical						
+N14.HOG0000138	OG0000126	n0														ctg221_9|hypothetical					O9324_03680|hypothetical	
+N14.HOG0000139	OG0000127	n0																			O9324_03760|hypothetical	
+N14.HOG0000140	OG0000128	n0													O9326_09960|hypothetical						O9324_00055|hypothetical	
+N14.HOG0000141	OG0000129	n0																			O9324_11170|hypothetical	
+N14.HOG0000142	OG0000132	n0													O9326_03850|hypothetical	ctg35_26|hypothetical					O9324_03970|hypothetical	
+N14.HOG0000143	OG0000133	n0														ctg35_11|hypothetical					O9324_11545|hypothetical	
+N14.HOG0000144	OG0000134	n0													O9326_07125|biosynthetic	ctg234_4|biosynthetic					O9324_24160|biosynthetic	
+N14.HOG0000145	OG0000135	n0													O9326_07130|hypothetical	ctg234_9|hypothetical, ctg234_5|hypothetical					O9324_24155|hypothetical	
+N14.HOG0000146	OG0000136	n0													O9326_07135|biosynthetic	ctg234_10|biosynthetic, ctg234_6|biosynthetic					O9324_24150|biosynthetic	
+N14.HOG0000147	OG0000141	n0													O9326_22435|hypothetical	ctg148_4|hypothetical						
+N14.HOG0000148	OG0000144	n0													O9326_10365|hypothetical	ctg160_22|hypothetical						
+N14.HOG0000149	OG0000145	n0													O9326_11045|hypothetical, O9326_10385|hypothetical	ctg160_26|hypothetical						
+N14.HOG0000150	OG0000146	n0													O9326_11040|hypothetical, O9326_10390|hypothetical	ctg160_27|hypothetical						
+N14.HOG0000151	OG0000148	n0														ctg221_8|biosynthetic-additional					O9324_03675|biosynthetic-additional	
+N14.HOG0000152	OG0000149	n0																			O9324_11155|hypothetical	
+N14.HOG0000153	OG0000157	n0													O9326_23815|hypothetical	ctg122_13|hypothetical						
+N14.HOG0000154	OG0000158	n0														ctg122_18|hypothetical						
+N14.HOG0000155	OG0000161	n0														ctg35_9|hypothetical						
+N14.HOG0000156	OG0000162	n0														ctg35_8|hypothetical						
+N14.HOG0000157	OG0000163	n0														ctg35_7|hypothetical						
+N14.HOG0000158	OG0000164	n0														ctg35_6|hypothetical						
+N14.HOG0000159	OG0000165	n0														ctg35_4|hypothetical						
+N14.HOG0000160	OG0000167	n0													O9326_10020|hypothetical	ctg304_15|hypothetical					O9324_00115|hypothetical	
+N14.HOG0000161	OG0000168	n0																			O9324_19145|hypothetical	
+N14.HOG0000162	OG0000169	n0																			O9324_19150|hypothetical	
+N14.HOG0000163	OG0000170	n0																			O9324_19155|hypothetical	
+N14.HOG0000164	OG0000171	n0																			O9324_19160|hypothetical	
+N14.HOG0000165	OG0000172	n0														ctg35_3|hypothetical						
+N14.HOG0000166	OG0000173	n0														ctg35_2|hypothetical						
+N14.HOG0000167	OG0000174	n0													O9326_22470|hypothetical	ctg148_13|hypothetical						
+N14.HOG0000168	OG0000175	n0														ctg251_2|biosynthetic						
+N14.HOG0000169	OG0000176	n0														ctg251_1|biosynthetic						
+N14.HOG0000170	OG0000179	n0														ctg194_4|transport						
+N14.HOG0000171	OG0000182	n0																			O9324_03965|hypothetical	
+N14.HOG0000172	OG0000184	n0													O9326_06145|biosynthetic-additional	ctg148_17|biosynthetic-additional						
+N14.HOG0000173	OG0000186	n0													O9326_10325|hypothetical	ctg160_14|hypothetical						
+N14.HOG0000174	OG0000187	n0														ctg188_9|hypothetical						
+N14.HOG0000175	OG0000188	n0														ctg194_2|hypothetical						
+N14.HOG0000176	OG0000189	n0																			O9324_10485|biosynthetic-additional	
+N14.HOG0000177	OG0000191	n0																			O9324_10800|hypothetical, O9324_11165|hypothetical	
+N14.HOG0000178	OG0000203	n0														ctg122_15|biosynthetic-additional						
+N14.HOG0000179	OG0000204	n0														ctg122_16|biosynthetic-additional						
+N14.HOG0000180	OG0000205	n0														ctg122_17|transport						
+N14.HOG0000181	OG0000206	n0														ctg4_7|hypothetical					O9324_10455|hypothetical	
+N14.HOG0000182	OG0000210	n0													O9326_06185|hypothetical	ctg148_24|hypothetical					O9324_21685|hypothetical	
+N14.HOG0000183	OG0000211	n0													O9326_06190|hypothetical	ctg148_25|hypothetical					O9324_21680|hypothetical	
+N14.HOG0000184	OG0000212	n0													O9326_06195|regulatory	ctg148_26|regulatory					O9324_21675|regulatory	
+N14.HOG0000185	OG0000213	n0													O9326_06200|hypothetical	ctg148_27|hypothetical					O9324_21670|hypothetical	
+N14.HOG0000186	OG0000214	n0													O9326_16455|biosynthetic-additional	ctg112_3|biosynthetic-additional						
+N14.HOG0000187	OG0000215	n0													O9326_16450|hypothetical	ctg112_2|hypothetical						
+N14.HOG0000188	OG0000216	n0													O9326_16445|hypothetical	ctg112_1|hypothetical						
+N14.HOG0000189	OG0000217	n0																			O9324_18515|biosynthetic-additional	
+N14.HOG0000190	OG0000218	n0																			O9324_18490|hypothetical	
+N14.HOG0000191	OG0000219	n0																			O9324_06465|hypothetical	
+N14.HOG0000192	OG0000220	n0													O9326_00660|biosynthetic	ctg188_1|biosynthetic						
+N14.HOG0000193	OG0000221	n2														ctg122_20|hypothetical						
+N14.HOG0000194	OG0000221	n3														ctg122_22|hypothetical						
+N14.HOG0000195	OG0000223	n0													O9326_07245|biosynthetic	ctg194_6|biosynthetic						
+N14.HOG0000196	OG0000227	n0													O9326_09975|hypothetical	ctg160_28|other					O9324_00070|hypothetical	
+N14.HOG0000197	OG0000235	n0													O9326_10355|hypothetical	ctg160_20|hypothetical						
+N14.HOG0000198	OG0000237	n0													O9326_10265|other	ctg160_2|other						
+N14.HOG0000199	OG0000238	n0													O9326_10270|other	ctg160_3|other						
+N14.HOG0000200	OG0000253	n0														ctg4_2|hypothetical					O9324_10440|hypothetical	
+N14.HOG0000201	OG0000254	n0														ctg4_3|hypothetical					O9324_10445|hypothetical	
+N14.HOG0000202	OG0000255	n0														ctg4_6|hypothetical					O9324_10450|hypothetical	
+N14.HOG0000203	OG0000257	n0																			O9324_06510|hypothetical	
+N14.HOG0000204	OG0000263	n0													O9326_06180|hypothetical	ctg148_23|hypothetical						
+N14.HOG0000205	OG0000264	n0																			O9324_10765|hypothetical	
+N14.HOG0000206	OG0000265	n0																			O9324_10750|biosynthetic-additional	
+N14.HOG0000207	OG0000266	n0																			O9324_10745|biosynthetic-additional	
+N14.HOG0000208	OG0000267	n0																			O9324_10785|biosynthetic	
+N14.HOG0000209	OG0000270	n0													O9326_03860|hypothetical	ctg35_28|hypothetical					O9324_03980|hypothetical	
+N14.HOG0000210	OG0000271	n0													O9326_03855|hypothetical	ctg35_27|hypothetical					O9324_03975|hypothetical	
+N14.HOG0000211	OG0000272	n0														ctg304_9|hypothetical						
+N14.HOG0000212	OG0000273	n0																			O9324_19180|hypothetical	
+N14.HOG0000213	OG0000274	n0																			O9324_19185|hypothetical	
+N14.HOG0000214	OG0000275	n0																			O9324_19190|hypothetical	
+N14.HOG0000215	OG0000276	n0														ctg122_21|hypothetical, ctg122_19|hypothetical						
+N14.HOG0000216	OG0000280	n0														ctg122_9|hypothetical						
+N14.HOG0000217	OG0000283	n0													O9326_07250|hypothetical	ctg194_7|hypothetical						
+N14.HOG0000218	OG0000284	n0													O9326_07270|hypothetical	ctg194_13|hypothetical						
+N14.HOG0000219	OG0000289	n0													O9326_07240|transport	ctg194_5|transport						
+N14.HOG0000220	OG0000290	n0														ctg194_3|hypothetical, ctg194_12|hypothetical						
+N14.HOG0000221	OG0000291	n0																			O9324_06460|hypothetical	
+N14.HOG0000222	OG0000293	n0													O9326_07120|hypothetical	ctg234_3|hypothetical					O9324_24165|hypothetical	
+N14.HOG0000223	OG0000295	n0													O9326_22430|hypothetical	ctg148_2|hypothetical						
+N14.HOG0000224	OG0000386	-													O9326_07115|biosynthetic-additional	ctg234_1|biosynthetic-additional					O9324_24170|biosynthetic-additional	
+N14.HOG0000225	OG0000387	-													O9326_07140|hypothetical	ctg234_7|hypothetical, ctg234_8|hypothetical						
+N14.HOG0000226	OG0000388	-													O9326_09980|hypothetical	ctg304_5|hypothetical					O9324_00075|hypothetical	
+N14.HOG0000227	OG0000390	-														ctg304_1|hypothetical, ctg304_4|hypothetical, ctg304_6|hypothetical						
+N14.HOG0000228	OG0000523	-													O9326_23805|hypothetical	ctg122_11|hypothetical						
+N14.HOG0000229	OG0000524	-													O9326_10970|hypothetical, O9326_10965|biosynthetic-additional							
+N14.HOG0000230	OG0000525	-													O9326_10985|hypothetical, O9326_10980|hypothetical							
+N14.HOG0000231	OG0000526	-													O9326_09985|hypothetical						O9324_00080|hypothetical	
+N14.HOG0000232	OG0000527	-													O9326_13265|biosynthetic	ctg3_1|biosynthetic						
+N14.HOG0000233	OG0000528	-													O9326_02760|hypothetical	ctg221_25|hypothetical						
+N14.HOG0000234	OG0000529	-													O9326_22425|hypothetical	ctg148_1|hypothetical						
+N14.HOG0000235	OG0000530	-														ctg188_11|hypothetical, ctg112_13|hypothetical						
+N14.HOG0000236	OG0000532	-														ctg4_4|hypothetical, ctg4_9|hypothetical						
+N14.HOG0000237	OG0000533	-														ctg4_8|hypothetical					O9324_10460|hypothetical	
+N14.HOG0000238	OG0000534	-														ctg4_10|hypothetical					O9324_10465|hypothetical	
+N14.HOG0000239	OG0000535	-														ctg4_11|hypothetical					O9324_10470|hypothetical	

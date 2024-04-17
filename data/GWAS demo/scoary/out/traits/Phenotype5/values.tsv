@@ -1,0 +1,21 @@
+isolate	binary	numeric
+LE17_10A	True	0.99
+LE17_20C	False	0.57
+LE18_22.4.newname	True	0.96
+LE19_10.1C	False	0.56
+LE19_114.1A	True	0.82
+LE19_12.1	False	0.49
+LE19_131.1	False	0.65
+LE19_195.1	False	0.55
+LE19_196.1		0.73
+LE19_197		0.71
+LE19_251	False	0.49
+LE19_281	False	0.6
+LE19_338.1	False	0.51
+LE19_388.1C	True	0.81
+LE19_4.1A	True	0.79
+LE19_41.2	False	0.56
+LE19_55.1	False	0.57
+LE19_8.1	False	0.64
+LE19_84.1	False	0.59
+LE19_98.1	False	0.59

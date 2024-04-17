@@ -1,0 +1,3 @@
+Gene	Annotation	g+t+	g+t-	g-t+	g-t-	sensitivity	specificity	odds_ratio	fisher_p	fisher_q	empirical_p	fq*ep	contrasting	supporting	opposing	best	worst
+N0.HOG0000351	protein	2	1	1	16	66.66666666666666	94.11764705882352	32.0	0.0456140350877193	1.0	0.029850746268656716	0.029850746268656716	2	2	1	0.5	1.0
+N0.HOG0000023	(rule-based-clusters) cyanobactin: cyanobactin_synth	0	15	3	2	100.0	88.23529411764706	0.0	0.0087719298245613	1.0	0.08955223880597014	0.08955223880597014	3	0	3	0.25	0.25

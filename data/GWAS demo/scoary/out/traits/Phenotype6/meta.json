@@ -1,0 +1,23 @@
+{
+    "genes-content-type": "gene-list",
+    "binarization-method": "gaussian",
+    "binarization-info": {
+        "method": "gaussian",
+        "success": true,
+        "means": [
+            0.7561073468711615,
+            0.5936355667173826
+        ],
+        "weights": [
+            0.2822916892964856,
+            0.7177083107035144
+        ],
+        "covariances": [
+            0.00797762011916449,
+            0.00797762011916449
+        ]
+    },
+    "info": {
+        "Description": "SFFIG.mean"
+    }
+}

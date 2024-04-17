@@ -1,0 +1,9 @@
+2024-04-15 21:02:45,294 [scoary: INFO] Setting up trait analysis worker 1
+2024-04-15 21:02:45,304 [scoary.analyze_trait: DEBUG] Analyzing trait='Phenotype2', step 1: Fisher's test
+2024-04-15 21:02:45,335 [scoary.analyze_trait: DEBUG] Analyzing trait='Phenotype3', step 1: Fisher's test
+2024-04-15 21:02:45,349 [scoary.analyze_trait: DEBUG] Analyzing trait='Phenotype5', step 1: Fisher's test
+2024-04-15 21:02:47,327 [scoary: INFO] Setting up trait analysis worker 1
+2024-04-15 21:02:47,335 [scoary.analyze_trait: DEBUG] Analyzing trait='Phenotype1', step 2: Pair picking
+2024-04-15 21:02:47,362 [scoary.permutations: DEBUG] Phenotype1: reused 50 out of 50
+2024-04-15 21:02:47,370 [scoary.analyze_trait: DEBUG] Analyzing trait='Phenotype5', step 2: Pair picking
+2024-04-15 21:02:47,383 [scoary.permutations: DEBUG] Phenotype5: reused 34 out of 34

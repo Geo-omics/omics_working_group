@@ -1,0 +1,23 @@
+{
+    "genes-content-type": "gene-list",
+    "binarization-method": "gaussian",
+    "binarization-info": {
+        "method": "gaussian",
+        "success": true,
+        "means": [
+            7.365373919403844,
+            22.192630193554464
+        ],
+        "weights": [
+            0.3653494681277293,
+            0.6346505318722707
+        ],
+        "covariances": [
+            19.10133763364822,
+            19.10133763364822
+        ]
+    },
+    "info": {
+        "Description": "FRB.adj.mean"
+    }
+}

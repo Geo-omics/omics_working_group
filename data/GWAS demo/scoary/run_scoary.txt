@@ -1,0 +1,54 @@
+## run scoary
+
+# Mount image to Orthofinder
+## Mounting /Users/linyusheng/ to /input within the container. Specify the file directory by putting your directory after the mounted point, i.e. /input
+
+docker run --platform linux/amd64 -it -v /Users/linyusheng/:/input:Z davidemms/orthofinder:2.5.4 orthofinder -f /input/LE_BGCs/fastas
+
+# Get the OrthoFinder subdir name as a variable
+ORTHOFINDER_RUN=$(basename LE_BGCs/fastas/OrthoFinder/Results_*)  # e.g Results_Jan1
+
+
+# Create environment
+#python3 -m venv ./venv 
+# Activate envirionment venv
+source venv/bin/activate # command to leave the virtual env: "deactivate"
+# pip install -U pip setuptools wheel
+
+# Create a gene-info file
+## install orthofinder-tools
+#pip install orthofinder-tools
+
+annotate_orthogroups \
+  --orthogroups_tsv LE_BGCs/fastas/OrthoFinder/$ORTHOFINDER_RUN/Phylogenetic_Hierarchical_Orthogroups/N0.tsv \
+  --fasta_dir LE_BGCs/fastas/ \
+  --file_endings faa \
+  --hog True \
+  --header True \
+  --out LE_BGCs/N0_best_names.tsv
+
+
+# Run Scoary2
+scoary2 \
+  --genes LE_BGCs/fastas/OrthoFinder/$ORTHOFINDER_RUN/Phylogenetic_Hierarchical_Orthogroups/N0.tsv \
+  --gene-data-type 'gene-list:\t' \
+  --gene-info LE_BGCs/N0_best_names.tsv \
+  --traits LE_BGCs/traits.tsv \
+  --trait-data-type 'gaussian:kmeans:\t' \
+  --trait-info LE_BGCs/trait_info.tsv \
+  --isolate-info LE_BGCs/isolate_info.tsv \
+  --n-permut 200 \
+  --n-cpus 2 \
+  --outdir LE_BGCs/out \
+  --multiple_testing native:0.05  # force some output by setting a high p-value threshold
+
+# Inspect html file
+## run a simple server
+cd LE_BGCs
+python -m http.server --cgi 8080
+# open http://0.0.0.0:8080/out/overview.html
+# open http://0.0.0.0:8080/out/trait.html?trait=REAL_TRAIT_NAME_HERE
+## To find and kill the process
+sudo lsof -i :8080
+sudo kill <PID>
+

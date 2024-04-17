@@ -1,0 +1,23 @@
+{
+    "genes-content-type": "gene-list",
+    "binarization-method": "gaussian",
+    "binarization-info": {
+        "method": "gaussian",
+        "success": true,
+        "means": [
+            1.2737100225653875,
+            3.2088958572487662
+        ],
+        "weights": [
+            0.8474100150268383,
+            0.15258998497316162
+        ],
+        "covariances": [
+            0.19547518931789828,
+            0.19547518931789828
+        ]
+    },
+    "info": {
+        "Description": "FR.dev.mean"
+    }
+}

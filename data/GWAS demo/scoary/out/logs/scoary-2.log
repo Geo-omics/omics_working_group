@@ -1,0 +1,112 @@
+2024-04-15 21:02:41,800 [scoary: DEBUG] Scoary2 Version: 0.0.15
+2024-04-15 21:02:41,800 [scoary: INFO] Loading traits...
+2024-04-15 21:02:41,800 [scoary.load_traits: DEBUG] Loading numeric traits: traits='LE_BGCs/traits.tsv' delimiter='\t'
+2024-04-15 21:02:41,810 [scoary.load_traits: DEBUG] Loaded numeric_df:
+                   Phenotype1  Phenotype2  Phenotype3  Phenotype4  Phenotype5  Phenotype6
+Isolate                                                                                  
+LE17_10A                 2.77      -21.13        1.83        8.80        0.99        0.37
+LE17_20C                21.30       17.65        0.90        0.96        0.57        0.62
+LE18_22.4.newname        1.54        6.89        3.27        8.04        0.96        0.83
+LE19_10.1C              22.65       17.43        1.71        1.77        0.56        0.63
+LE19_114.1A              6.21        6.53        1.49        1.25        0.82        0.82
+LE19_12.1               29.58       25.96        1.66        1.74        0.49        0.53
+LE19_131.1              15.00       14.21        1.95        2.61        0.65        0.67
+LE19_195.1              23.07       21.32        0.90        0.98        0.55        0.58
+LE19_196.1              10.85       10.55        3.14        1.60        0.73        0.75
+LE19_197                11.54       16.97        2.08        1.95        0.71        0.63
+LE19_251                30.25       28.19        1.02        1.52        0.49        0.51
+LE19_281                19.79       13.75        0.89        1.09        0.60        0.72
+LE19_338.1              27.20       29.73        0.85        1.03        0.51        0.50
+LE19_388.1C              6.81       20.78        1.87        1.37        0.81        0.59
+LE19_4.1A                8.20        7.58        3.28        3.66        0.79        0.85
+LE19_41.2               22.13       20.54        0.68        0.77        0.56        0.59
+LE19_55.1               21.29       17.28        0.69        0.97        0.57        0.63
+LE19_8.1                16.16       16.60        0.77        0.52        0.64        0.64
+LE19_84.1               19.48       12.48        1.37        1.93        0.59        0.70
+LE19_98.1               19.69       17.02        1.03        1.10        0.59        0.63
+2024-04-15 21:02:41,810 [scoary.load_traits: INFO] Binarizing traits...
+2024-04-15 21:02:41,810 [scoary.load_traits: INFO] Binarizing traits: method='gaussian' alternative='kmeans' cutoff=0.85 covariance_type='tied' n_cpus=1 random_state=None
+2024-04-15 21:02:41,810 [scoary.load_traits: DEBUG] Binarizing trait='Phenotype1' using gaussian mixture.
+2024-04-15 21:02:41,849 [scoary.load_traits: DEBUG] Binarizing trait='Phenotype2' using gaussian mixture.
+2024-04-15 21:02:41,858 [scoary.load_traits: DEBUG] Binarizing trait='Phenotype3' using gaussian mixture.
+2024-04-15 21:02:41,864 [scoary.load_traits: DEBUG] Binarizing trait='Phenotype4' using gaussian mixture.
+2024-04-15 21:02:41,874 [scoary.load_traits: DEBUG] Binarizing trait='Phenotype5' using gaussian mixture.
+2024-04-15 21:02:41,880 [scoary.load_traits: DEBUG] Binarizing trait='Phenotype6' using gaussian mixture.
+2024-04-15 21:02:41,900 [scoary.load_traits: DEBUG] Binarized traits:
+                   Phenotype1  Phenotype2  Phenotype3  Phenotype4  Phenotype5  Phenotype6
+Isolate                                                                                  
+LE17_10A                False       False       False        True        True       False
+LE17_20C                 True        True       False       False       False       False
+LE18_22.4.newname       False        True        True        True        True        True
+LE19_10.1C               True        True       False       False       False       False
+LE19_114.1A             False        True       False       False        True        True
+LE19_12.1                True        True       False       False       False       False
+LE19_131.1               <NA>        True       False       False       False        <NA>
+LE19_195.1               True        True       False       False       False       False
+LE19_196.1              False        True        True       False        <NA>        <NA>
+LE19_197                False        True       False       False        <NA>       False
+LE19_251                 True        True       False       False       False       False
+LE19_281                 True        True       False       False       False        <NA>
+LE19_338.1               True        True       False       False       False       False
+LE19_388.1C             False        True       False       False        True       False
+LE19_4.1A               False        True        True       False        True        True
+LE19_41.2                True        True       False       False       False       False
+LE19_55.1                True        True       False       False       False       False
+LE19_8.1                 <NA>        True       False       False       False        <NA>
+LE19_84.1                True        True       False       False       False        <NA>
+LE19_98.1                True        True       False       False       False       False
+2024-04-15 21:02:41,900 [scoary: DEBUG] Setting recursion limit to 1000
+2024-04-15 21:02:41,900 [scoary: INFO] Loading trait info...
+2024-04-15 21:02:41,903 [scoary: DEBUG] Loaded descriptions for 6 Traits
+2024-04-15 21:02:41,903 [scoary: DEBUG] Loaded Trait descriptions. columns=['Description']
+2024-04-15 21:02:41,903 [scoary: INFO] Loading genes...
+2024-04-15 21:02:41,919 [scoary.load_genes: DEBUG] Cols kept: ['LE19_4.1A', 'LE19_114.1A', 'LE19_195.1', 'LE19_8.1', 'LE19_98.1', 'LE19_251', 'LE19_12.1', 'LE19_338.1', 'LE19_55.1', 'LE19_41.2', 'LE17_20C', 'LE19_84.1', 'LE19_388.1C', 'LE19_281', 'LE19_196.1', 'LE19_197', 'LE19_10.1C', 'LE18_22.4.newname', 'LE17_10A', 'LE19_131.1']
+2024-04-15 21:02:41,920 [scoary.load_genes: DEBUG] Cols dropped: []
+2024-04-15 21:02:41,951 [scoary.load_genes: DEBUG] Loaded gene-list -df:
+               LE17_10A  LE17_20C  LE18_22.4.newname  LE19_10.1C  LE19_114.1A  LE19_12.1  ...  LE19_4.1A  LE19_41.2  LE19_55.1  LE19_8.1  LE19_84.1  LE19_98.1
+HOG                                                                                       ...                                                                 
+N0.HOG0000000      True      True               True        True         True       True  ...      False       True      False      True       True      False
+N0.HOG0000001      True      True               True        True         True       True  ...      False       True      False      True      False      False
+N0.HOG0000002      True     False               True        True        False      False  ...       True       True      False     False       True      False
+N0.HOG0000003     False      True              False        True        False      False  ...      False       True      False      True      False      False
+N0.HOG0000004     False      True              False        True        False      False  ...      False       True      False      True      False      False
+...                 ...       ...                ...         ...          ...        ...  ...        ...        ...        ...       ...        ...        ...
+N0.HOG0000605     False     False              False       False        False      False  ...      False      False       True     False      False       True
+N0.HOG0000606     False     False              False       False        False      False  ...      False      False       True     False      False       True
+N0.HOG0000607     False     False              False       False        False      False  ...      False      False       True     False      False       True
+N0.HOG0000608     False     False              False       False        False      False  ...      False      False       True     False      False       True
+N0.HOG0000609     False     False              False       False        False      False  ...      False      False       True     False      False       True
+
+[606 rows x 20 columns]
+2024-04-15 21:02:41,951 [scoary: INFO] Loading gene info...
+2024-04-15 21:02:41,953 [scoary: DEBUG] Loaded descriptions for 606 Genes
+2024-04-15 21:02:41,953 [scoary: DEBUG] Loaded Gene descriptions. columns=['Annotation']
+2024-04-15 21:02:41,953 [scoary: INFO] Loading isolate info...
+2024-04-15 21:02:41,954 [scoary: DEBUG] Loaded descriptions for 20 Isolates
+2024-04-15 21:02:41,954 [scoary: DEBUG] Loaded Isolate descriptions. columns=['Species']
+2024-04-15 21:02:41,954 [scoary: INFO] Generating phylogenetic tree from gene presence-absence-matrix...
+2024-04-15 21:02:41,972 [scoary: INFO] Finalizing setup...
+2024-04-15 21:02:43,583 [scoary: INFO] Starting step 1: Fisher's test...
+2024-04-15 21:02:45,626 [scoary: INFO] Step 1 took 0:00:02.039962
+2024-04-15 21:02:45,629 [scoary: INFO] Number of duplicated traits: 0
+2024-04-15 21:02:45,629 [scoary: INFO] Number of non-duplicated traits: 6
+2024-04-15 21:02:45,637 [scoary: INFO] Number of traits left after multiple testing correction: 4
+2024-04-15 21:02:45,637 [scoary: INFO] Starting step 2: Pair picking...
+2024-04-15 21:02:47,649 [scoary: INFO] Step 2 took 0:00:02.009297
+2024-04-15 21:02:47,656 [scoary: DEBUG] Created summary_df:
+            best_fisher_p  best_fisher_q  best_empirical_p  best_fq*ep
+Phenotype6       0.028571            1.0          0.034826    0.034826
+Phenotype3       0.045614            1.0          0.029851    0.029851
+Phenotype1       0.011438            1.0          0.039801    0.039801
+Phenotype5       0.007703            1.0          0.019900    0.019900
+2024-04-15 21:02:47,658 [scoary.final_overview: INFO] Copying exploration app...
+2024-04-15 21:02:47,663 [scoary.final_overview: INFO] Adding isolate_info.tsv...
+2024-04-15 21:02:47,665 [scoary.final_overview: DEBUG] Adding preliminary summary.tsv...
+2024-04-15 21:02:47,665 [scoary.final_overview: DEBUG] Adding trait_info_df to summary.tsv...
+2024-04-15 21:02:47,668 [scoary.final_overview: INFO] Calculating dendrogram linkage matrix...
+2024-04-15 21:02:47,668 [scoary.final_overview: INFO] Calculating dendrogram based on correlation of numeric features...
+2024-04-15 21:02:47,674 [scoary.final_overview: INFO] Calculating dendrogram plot...
+2024-04-15 21:02:47,857 [scoary.final_overview: INFO] Saving sorted summary.tsv...
+2024-04-15 21:02:47,858 [scoary: INFO] Cleaning up...
+2024-04-15 21:02:47,858 [scoary: INFO] Complete success!
+2024-04-15 21:02:47,859 [scoary: INFO] Took 0:00:06.058666

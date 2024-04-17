@@ -1,0 +1,21 @@
+Isolate	Phenotype1	Phenotype2	Phenotype3	Phenotype4	Phenotype5	Phenotype6
+LE17_10A	False	False	False	True	True	False
+LE17_20C	True	True	False	False	False	False
+LE18_22.4.newname	False	True	True	True	True	True
+LE19_10.1C	True	True	False	False	False	False
+LE19_114.1A	False	True	False	False	True	True
+LE19_12.1	True	True	False	False	False	False
+LE19_131.1		True	False	False	False	
+LE19_195.1	True	True	False	False	False	False
+LE19_196.1	False	True	True	False		
+LE19_197	False	True	False	False		False
+LE19_251	True	True	False	False	False	False
+LE19_281	True	True	False	False	False	
+LE19_338.1	True	True	False	False	False	False
+LE19_388.1C	False	True	False	False	True	False
+LE19_4.1A	False	True	True	False	True	True
+LE19_41.2	True	True	False	False	False	False
+LE19_55.1	True	True	False	False	False	False
+LE19_8.1		True	False	False	False	
+LE19_84.1	True	True	False	False	False	
+LE19_98.1	True	True	False	False	False	False
