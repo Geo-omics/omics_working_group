@@ -1,0 +1,99 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+pangenome_table <- read_csv("/geomicro/data2/kiledal/projects/microcystis_genomes_2022/data/panaroo/gene_presence_absence_roary.csv")
+  
+cols_to_remove <- pangenome_table %>% 
+  dplyr::select(`Non-unique Gene name`:`Avg group size nuc`) %>% 
+  colnames()
+
+genes_of_intertest = data.frame(
+  Gene = c("group_3577","group_4930"),
+  gene_name_not_from_panaroo = c("mcyE", "mcyA")
+)
+
+mcy_gene_list <- pangenome_table %>% 
+  dplyr::select(-any_of(cols_to_remove)) %>% 
+  filter(Gene %in% genes_of_intertest$Gene) %>% 
+  pivot_longer(-Gene,names_to = "genome",values_to = "gene_name") %>% 
+  left_join(genes_of_intertest) %>% 
+  filter(!is.na(gene_name)) %>% 
+  separate_longer_delim(gene_name, delim = ";") %>% 
+  mutate(genes_fasta = str_glue("/geomicro/data2/kiledal/projects/microcystis_genomes_2022/data/bakta/{genome}/{genome}.ffn"))
+
+#fasta <- mcy_gene_list$genes_fasta[1]
+#gene <- mcy_gene_list$gene_name[1]
+
+retreive_sequence <- function(fasta, gene){
+  seqs <- Biostrings::readDNAStringSet(fasta) %>% 
+    data.frame(seq = ., seq_name = names(.)) %>% 
+    unglue::unglue_unnest(seq_name, patterns = "{gene_name} {gene_annotation}") %>% 
+    filter(gene_name == gene)
+}
+
+
+mcy_seqs <- map2_dfr(mcy_gene_list$genes_fasta, mcy_gene_list$gene_name,retreive_sequence,.progress=TRUE)
+
+mcy_seqs_w_new_headers <- mcy_seqs %>% 
+  left_join(mcy_gene_list) %>% 
+  mutate(new_fasta_header = str_glue("{gene_name_not_from_panaroo} | {genome}"))
+
+mcy_seqs_w_new_headers$seq %>% 
+  `names<-`(mcy_seqs_w_new_headers$new_fasta_header) %>% 
+  Biostrings::DNAStringSet() %>% 
+  Biostrings::writeXStringSet("/tmp/mcye_seqs.fasta")
+
+```
+
+
+
+
+```{r}
+pangenome_table_metag <- read_csv("/geomicro/data2/kiledal/projects/2023_WLE_complete_cyano_pangenomes/data/panaroo/Microcystis/gene_presence_absence_roary.csv")
+
+cols_to_remove <- pangenome_table_metag %>% 
+  dplyr::select(`Non-unique Gene name`:`Avg group size nuc`) %>% 
+  colnames()
+
+genes_of_intertest = data.frame(
+  Gene = c("mcyB","mcyA"),
+  gene_name_not_from_panaroo = c("mcyB", "mcyA")
+)
+
+mcy_gene_list_metag <- pangenome_table_metag %>% 
+  dplyr::select(-any_of(cols_to_remove)) %>% 
+  filter(Gene %in% genes_of_intertest$Gene) %>% 
+  pivot_longer(-Gene,names_to = "genome",values_to = "gene_name") %>% 
+  left_join(genes_of_intertest) %>% 
+  filter(!is.na(gene_name)) %>% 
+  separate_longer_delim(gene_name, delim = ";") %>% 
+  mutate(genes_fasta = str_glue("/geomicro/data2/kiledal/projects/2023_WLE_complete_cyano_pangenomes/data/genomes/combined_annotated/Microcystis/{genome}/{genome}.ffn"),
+         annotation_files_exist = fs::file_exists(genes_fasta))
+
+#fasta <- mcy_gene_list$genes_fasta[1]
+#gene <- mcy_gene_list$gene_name[1]
+
+retreive_sequence <- function(fasta, gene){
+  seqs <- Biostrings::readDNAStringSet(fasta) %>% 
+    data.frame(seq = ., seq_name = names(.)) %>% 
+    unglue::unglue_unnest(seq_name, patterns = "{gene_name} {gene_annotation}") %>% 
+    filter(gene_name == gene)
+}
+
+
+mcy_seqs <- map2_dfr(mcy_gene_list$genes_fasta, mcy_gene_list$gene_name,retreive_sequence,.progress=TRUE)
+
+mcy_seqs_w_new_headers <- mcy_seqs %>% 
+  left_join(mcy_gene_list) %>% 
+  mutate(new_fasta_header = str_glue("{gene_name_not_from_panaroo} | {genome}"))
+
+mcy_seqs_w_new_headers$seq %>% 
+  `names<-`(mcy_seqs_w_new_headers$new_fasta_header) %>% 
+  Biostrings::DNAStringSet() %>% 
+  Biostrings::writeXStringSet("/tmp/mcye_seqs.fasta")
+
+```
+
