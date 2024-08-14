@@ -1,0 +1,524 @@
+---
+title: "Notebook1_Toxinreadmap"
+output: html_document
+date: "2024-06-13"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(future)
+library(dplyr)
+library(furrr)
+library(Rsamtools)
+library(RColorBrewer)
+```
+
+Goal: Create a toxin readmap figure for Zepernick et al. 2024, Trilake comaprison paper between Lake Simbi, Lake Naivasha, and Homa Bay Lake Victoria in May 2022 
+Includes GLAMR samples: samp_4317 (LV), samp_4318 (LV, HB 9), samp_4327 (LS), samp_4328 (LS), samp_4329 (LN), samp_4330 (LN)
+
+1. Create database and database key  
+2. Symlink reads for samples into a folder 
+3. Readmap database to reads 
+4. Process read mapping
+ A. RPKM
+ B. Identity and Coverage
+ C. Merge Bam statistics files and filter data for only keeping genes which are 50% covered 
+5. Read in metadata and database key, filter for hits where 70% of the gene cluster is present
+6. Visualize read mapping for final figure
+
+
+1. Create database and database key  
+```{r}
+##1. Already existing database and key 
+#db: /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/references
+#key:/geomicro/data21/lnhart/Projects/Kenya_2023/flagship_manuscript/FINAL/data/bgc_mining/code/db_key.csv
+
+#additions needed: anatoxin, lyngbyatoxin, made below
+
+#final db:/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/references/geneBGC_db_BZ.fa
+#final key: /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/references/db_keyBZ.csv
+```
+
+2. Symlink reads for samples into a folder 
+```{r}
+#read paths
+read_paths <- system("ls /geomicro/data2/kiledal/GLAMR/data/projects/set_55/metagenomes/samp_*/reads/decon_*_reads_fastp.fastq.gz",intern = TRUE) %>% 
+  data_frame(read_path = .)  %>% mutate(sample = read_path %>% str_remove(".*metagenomes/") %>% str_remove("/reads.*"),
+         read_dir = read_path %>% str_remove(".*decon_") %>% str_remove("_reads_fastp.*"),
+         read_dir_coverm = if_else(read_dir == "fwd", "fwd", "rev"),
+         new_path = str_glue("/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/data/decon_reads/{sample}_{read_dir_coverm}.fastq.gz")) 
+
+#filter for only reads of interest for paper
+read_paths2 = read_paths %>% filter(sample == "samp_4317"| sample == "samp_4318"| sample == "samp_4327"| sample == "samp_4328"| sample == "samp_4329"| sample == "samp_4330")
+
+#sym link
+file.symlink(read_paths$read_path, read_paths$new_path)
+```
+
+
+3. Readmap database to reads 
+```{r}
+#snakefile for read mapping: 
+#/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/code/Snakefile #ran on June 13th, 2024
+
+#Snakefile code below: 
+# import os
+# import re
+# import snakemake.io
+# from glob import glob
+# 
+# #--profile /geomicro/data21/lnhart/CSP22_data/config/snakemake_profiles/cayman
+# 
+# qc_reads = glob_wildcards("/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/data/decon_reads/{sample}_fwd.fastq.gz").sample  
+# 
+# rule read_mapping_wholebgc_kenya:
+#     input: 
+#         f_reads = "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/data/decon_reads/{sample}_fwd.fastq.gz",
+#         r_reads = "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/data/decon_reads/{sample}_rev.fastq.gz",
+#         ref = "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/references/geneBGC_db_BZ.fa"
+#     output: 
+#         sam = temp("/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_readmap/{sample}_mapped.sam"),
+#         temp_bam = temp("/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_readmap/{sample}_mapped_temp.bam"),
+#         unsorted_bam = temp("/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_readmap/{sample}_mapped_unsorted.bam"),
+#         bam = "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_readmap/{sample}_mapped.bam"
+#     conda: "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/config/minimap2.yaml"
+#     log: "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_readmap/{sample}_mapped_bam.log"
+#     resources: cpus=24
+#     shell: 
+#         """
+#         minimap2 \
+#             -ax sr \
+#             -t {resources.cpus} \
+#             --secondary=no \
+#             {input.ref} \
+#             {input.f_reads} {input.r_reads} > {output.sam}
+# 
+#         samtools view -bS {output.sam} > {output.temp_bam}
+# 
+#         filterBam \
+#             --in {output.temp_bam} \
+#             --out {output.unsorted_bam} \
+#             --minCover 80 \
+#             --minId 90
+# 
+#             samtools sort -o {output.bam} -@ {resources.cpus} {output.unsorted_bam}
+#             samtools index -@ {resources.cpus} {output.bam}
+#         """
+# 
+# rule read_mapping_pileup_wholebgc_kenya:
+#     input:
+#         bam = "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_readmap/{sample}_mapped.bam",
+#         ref = "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/references/geneBGC_db_BZ.fa"
+#     output:
+#         pileup = "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_readmap/{sample}_pileup.txt"
+#     conda: "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/config/minimap2.yaml"
+#     log: "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_readmap/{sample}_pileup.log"
+#     resources: cpus=24
+#     shell:
+#         """
+#         samtools mpileup -f {input.ref} -o {output.pileup} {input.bam}
+#         """
+# 
+# rule run_read_mapping_wholebgc_kenya:
+#     input:
+#         expand("/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_readmap/{sample}_pileup.txt", sample = qc_reads)
+```
+
+
+4. Process read mapping
+
+A. RPKM
+```{r}
+####Function to generate bam statistics (mapped reads, rpkm)
+
+ref_bam_rpkm <- function(bam_path) {
+  
+  # Identify sample_id from bam file path
+  sample_id <- bam_path %>%
+    str_remove(".*/") %>%  # Remove the directory path
+    str_remove(".bam")  # Remove the ".bam" part
+
+  # Get total sequencing read counts for sample from GLAMR
+  read_count_fastp <- read_tsv(paste0("/geomicro/data21/lnhart/Projects/Kenya_2023/flagship_manuscript/FINAL/data/bgc_mining/data/read_counts/", sample_id, "_read_count_fastp.tsv")) #get read counts for fwd reads
+  read_count_decon_fwd <- read_count_fastp %>% 
+    filter(read_state == "decon_reads") %>% 
+    pull(fwd_read_count)
+  
+  #Read in bam index
+  bam <- Rsamtools::BamFile(file = bam_path,  #read in bam index
+      index = paste0(bam_path,".bai"))
+
+  # Read in BAM file and get mapped read counts using idxstatsBam
+  mapped_read_counts <- idxstatsBam(bam) %>%     #read in bam index files
+    as.data.frame() %>% filter(!seqnames == "*")
+
+  # Remove spaces from reference names
+  mapped_read_counts$seqnames <- sub(" .*", "", mapped_read_counts$seqnames)  #I remove spaces from any of my seq names because this tends to work better downstream. You can always read in your original fasta file database for those original names and merge it with your dataframe. 
+
+  # Calculate RPKM
+  rpkm <- mapped_read_counts %>%
+    mutate(read_count_decon_fwd, 
+           sample_id,
+        per_million = read_count_decon_fwd / 1000000,  # Divide forward reads by 10e6
+        rpm = mapped / per_million,  # Mapped reads per million
+        rpkm = rpm / (seqlength / 1000)  # Calculate RPKM by getting reference legnth in kilobase pairs
+    )
+}
+
+bam_path_files <- system("ls /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_readmap/*.bam", intern = TRUE) %>%  #read in bam file paths
+  tibble(bam_path = .) 
+
+plan(multisession, workers = 24)  #run on multiple cores
+#options(future.globals.maxSize = 8000 * 1024^2) # if dataset is really large, this is a useful way to make it work. 
+bam_stats_rpkm <- future_map_dfr(bam_path_files$bam_path, ~ ref_bam_rpkm(.x), .progress = TRUE) # last run: August 14th, 2024, run the function
+plan(sequential) #end your multicore use 
+dim(bam_stats_rpkm)
+
+#Remove NAs, Instances where only 1 read mapped, and unnecessary columns 
+bam_stats_rpkm_filt = bam_stats_rpkm %>% filter(!is.na(mapped) & mapped > 1) %>% select(!unmapped)
+dim(bam_stats_rpkm_filt)
+
+#Write csv of information
+#write_csv(bam_stats_rpkm, file = "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_readmap/tables/wholebgc_rpkm_08142024.csv") 
+#write_csv(bam_stats_rpkm_filt, file = "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_readmap/tables/wholebgc_rpkm_08142024_filt.csv") 
+
+#Read csv of information
+#bam_stats_rpkm_filt <- read_csv(file = "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_readmap/tables/wholebgc_rpkm_08142024_filt.csv")
+#str(bam_stats_rpkm_filt)
+```
+
+B. Identity and Coverage
+```{r}
+####Function to generate base pair information (% identity, coverage) dataframe from bam and pileup files
+
+# reference sequence import
+ref_seq <- Biostrings::readDNAStringSet("/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/references/geneBGC_db_BZ.fa") %>%
+    as.character() %>%
+    data.frame(ref_base = ., seqnames = names(.)) %>%
+    mutate(seq_length = nchar(ref_base)) %>%
+    separate_longer_position(ref_base, width = 1) %>%
+    group_by(seqnames) %>%
+    mutate(pos = row_number()) %>%
+    ungroup() 
+
+#fix seq names to remove anything after a space (really messes things up in the function, for future notice should only use names without spaces (use underscores))
+ref_seq$seqnames <- sub(" .*", "", ref_seq$seqnames)
+
+# function to generate bam stats - reference cover & % id
+bam_stats <- function(bam_path){
+
+  # read in bam file
+  bam <- Rsamtools::BamFile(file = bam_path,
+                            index = paste0(bam_path,".bai"))
+  
+  pileup_ref_join <- Rsamtools::pileup(bam,pileupParam = PileupParam(distinguish_strands = FALSE)) %>% 
+    full_join(ref_seq, ., by = c("seqnames", "pos"))  # join pileup file and alignment reference
+
+out_bp_depth <- pileup_ref_join %>%
+      group_by(seqnames, pos, seq_length) %>% 
+    arrange(seqnames, pos, desc(count)) %>% 
+      mutate(depth = sum(count),                          # alignment depth at each position
+             rel_abund_base = count/depth) %>%            # relative abundance of base read at position compared to all reads at position
+    group_by(seqnames) %>% 
+      mutate(bam_path = bam_path,
+             sample_id = bam_path %>% str_remove(".*/") %>% str_remove(".bam")) %>%
+    ungroup()
+
+out_percent_id <- out_bp_depth %>%
+      group_by(seqnames) %>%
+    filter(nucleotide == ref_base) %>%                    # only look at bases that match reference
+      mutate(percent_id_ref_contig = (sum(count) / sum(depth)) * 100) %>%    #all reads matching ref / total reads for sequence            
+    ungroup()
+
+out_cover <- out_bp_depth %>%
+  filter(count >= 1, na.rm = TRUE) %>%                   # keep only positions with at least 1 count
+  distinct(seqnames, pos, .keep_all = TRUE) %>%
+    group_by(seqnames) %>%
+      mutate(percent_cover = (n()/seq_length) * 100) %>%      # number of bases matching reference divided by reference sequence length 
+    ungroup()
+
+out <- left_join(out_percent_id, out_cover)  # merge %id and cover data tables
+
+}
+
+# create list of bam paths to process
+bam_paths <- system("ls /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_readmap/*.bam", intern = TRUE) %>%
+  tibble(bam_path = .) 
+
+# run for bam stats!
+plan(multisession, workers = 24)
+options(future.globals.maxSize = 8000 * 1024^2)
+bam_stats_idcov <- map_df(bam_paths$bam_path, ~ bam_stats(.x), .progress = TRUE) #RUN LAST - (date: August 14th, 2024)
+plan(sequential)
+
+dim(bam_stats_idcov)
+
+#Filter NAs out of data 
+bam_stats_idcov_filt <-bam_stats_idcov %>% filter(!is.na(percent_cover))
+dim(bam_stats_idcov_filt)
+
+#Write csv files
+write_csv(bam_stats_idcov, file = "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_readmap/tables/wholebgc_bamstats_08142024.csv")
+write_csv(bam_stats_idcov_filt, file = "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_readmap/tables/wholebgc_bamstats_08142024_filt.csv")
+
+#Read filtered csv file
+#bam_stats_idcov_filt <- read_csv(file = "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_readmap/tables/wholebgc_bamstats_08142024_filt.csv", col_names = TRUE)
+```
+
+C. Merge Bam statistics files and filter data for only keeping genes which are 50% covered 
+```{r}
+##Clean up bam stats id and coverage dataframe, first keep hits that have at least 50% coverage
+bam_stats_idcov_filt_50 <- bam_stats_idcov_filt %>%
+    group_by(sample_id, seqnames) %>% 
+      select(seqnames, sample_id, percent_cover, percent_id_ref_contig) %>% # skim down data table to just data for each ref
+      distinct() %>%
+    group_by(sample_id) %>%
+      mutate(gene_present = percent_cover > 50) %>% filter(gene_present == TRUE)
+
+
+###Merge bam statistics files to have RPKM, Coverage, and Identity all Together 
+bam_stats_all = left_join(bam_stats_idcov_filt_50, bam_stats_rpkm_filt, by = c("seqnames", "sample_id"))
+dim(bam_stats_all)
+#393  11
+
+##Remove if any NAs in RPKM
+bam_stats_all = bam_stats_all %>% filter(!is.na(rpkm))
+dim(bam_stats_all)
+#385, 11
+```
+
+
+
+5. Read in metadata and database key
+```{r}
+##Read in key for database  
+db_key = read.csv("/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/references/db_keyBZ.csv")
+
+#edit db name to match seqnames in bam
+db_key$seqnames <- sub(" .*", "", db_key$DB_name)
+
+#make gene count variable for # of genes in eahc bgc
+db_key <- db_key %>%
+  group_by(New_BGC_name) %>%
+  mutate(gene_count = n())
+
+#join key with read mapping information
+bam_stats_all_key = left_join(bam_stats_all, db_key, by = "seqnames")
+dim(bam_stats_all_key)
+#[1] 384  25
+
+#Read in Metadata for these samples
+metadata = read.csv("/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/references/metadata.csv")
+
+#merge
+bam_stats_all_key_meta = left_join(bam_stats_all_key, metadata, by = "sample_id")
+dim(bam_stats_all_key_meta)
+#[1] 384  28
+
+##Filter for having 75% of core bgc genes present in the sample
+
+#1. Count for # of core genes in sample 
+db_key_core <- db_key %>%
+  filter(gene_type == "core") %>%
+  group_by(New_BGC_name) %>%
+  dplyr::summarize(core_number = n())
+
+cov_core = left_join(bam_stats_all_key_meta, db_key_core, by = "New_BGC_name") #merge new df for core gene count
+
+#2. Filter for only core gene observations--this takes in consideration genes that are 50% covered (75% of core genes that are covered 50% or more are present in a sample)
+cov_core2 = cov_core %>% filter(gene_type == "core")
+dim(cov_core2)
+#[1] 94 29
+
+#3.Calculate the fraction of core genes present and summarize the summed rpkm of those core genes in a sample
+cov_core3 = cov_core2 %>% group_by(sample_id, New_BGC_name) %>% dplyr::summarize(
+    total_rpkm = sum(rpkm),
+    core_gene_count = n(),
+    frac_core = core_gene_count/core_number,
+    average_rpkm = total_rpkm / core_number,
+    .groups = 'drop'
+  )
+
+dim(cov_core3)
+#[1] 94  6
+
+#4. Only select which have 75% of core genes present 
+cov_core75 = cov_core3 %>% filter(frac_core >= .75)
+dim(cov_core75)
+#[1] 75  6
+
+#5. merge with any missing metadata 
+cov_core75 = left_join(cov_core75, metadata, by = "sample_id")
+cov_core75$lake_name[is.na(cov_core75$lake_name)] <- "Naivasha"
+cov_core75$replicate[cov_core75$sample_id == "samp_4329"] <- "R1"
+cov_core75$abbrev[cov_core75$sample_id == "samp_4329"] <- "LN"
+
+#6. remove merocyclophane (not included in this study)
+cov_core75 = cov_core75 %>% filter(!New_BGC_name == "Merocyclophane-like-Microcystis")
+dim(cov_core75)
+#67, 9
+
+#6. Make an organism column
+cov_core75_final = cov_core75 %>%   mutate(organism = sub(".+-(\\w+)$", "\\1", New_BGC_name))
+
+#7. Make a compound column 
+cov_core75_final = cov_core75_final %>%  mutate(compound = str_extract(New_BGC_name, "^[^-]+"))
+
+cov_core75_final = cov_core75_final %>%  mutate(
+    compound = case_when(
+      organism == "Anabaena" & compound == "Anacyclamide" ~ "Anacylamide ",
+      TRUE ~ compound
+    )
+  )
+
+cov_core75_final = cov_core75_final %>%  mutate(
+    compound = case_when(
+      compound == "Microcystin LR" ~ "Microcystin",
+      TRUE ~ compound
+    )
+  )
+
+cov_core75_final = cov_core75_final %>%  mutate(
+    compound = case_when(
+      compound == "Microviridin J" ~ "Microviridin",
+      TRUE ~ compound
+    )
+  )
+
+#8. make unique identifier column
+cov_core75_final = cov_core75_final %>% mutate(unique = paste(replicate, "_", abbrev))
+
+
+#9. Write final table to server
+#This table consists of all BGCs that had at least 75% of their core BGCs present in the read mapping set (which was at a 80% coverage and 90% identity for read map threshold done with minimap2 and all genes kept as hits had coverage of 50% or more). I used this table to make the plot below. I looked at parsing the data different ways (whole BGC present, 70% of the BGC present)--and this and the 70% of BGC present yielded very similar data. I think it is important to say the core BGCs were present since they are known to be essential for compound biosynthesis. The total RPKM shown is equal to the sum(RPKM) and the average rpkm is shown equaling each core gene present/# of core genes within the BGC. 
+
+write.csv(cov_core75_final, "/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/to_britt/core_toxins_75perc.csv")
+
+```
+
+
+6. Visualize read mapping for final figure
+```{r}
+####Color scale
+n <- 180
+qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',]
+col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
+
+col_vector[1] <- "dodgerblue"
+col_vector[2] <- "green4"
+col_vector[3] <- "pink"
+col_vector[4] <- "orange"
+
+####Visualization for total rpkm-faceted
+cov_core75_final %>%
+  ggplot(aes(x = replicate, y = compound, fill = organism, size = total_rpkm)) +
+  geom_point(shape = 21) +
+  scale_fill_manual(values = col_vector) +
+  scale_size_continuous(range = c(4, 10)) +
+  labs(x = "Sample", y = "BGC", fill = "BGC", size = "Total RPKM") +
+  theme_bw()  + facet_grid(~lake_name, scales = "free")
+
+ggsave(ggsave("/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/to_britt/toxins_faceted_total.png",width = 8, height =8, dpi=300, scale =2, limitsize = FALSE))
+ggsave(ggsave("/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/to_britt/toxins_faceted_total.pdf",width = 8, height =8, dpi=300, scale =2, limitsize = FALSE))
+
+
+####Visualization for total rpkm-not faceted
+cov_core75_final2 = cov_core75_final %>% mutate(unique = fct_relevel(unique, 
+            "R1 _ LV", "R2 _ LV", "R1 _ LN", 
+            "R2 _ LN"))
+
+
+cov_core75_final2 %>%
+  ggplot(aes(x = unique, y = compound, fill = organism, size = total_rpkm)) +
+  geom_point(shape = 21) +
+  scale_fill_manual(values = col_vector) +
+  scale_size_continuous(range = c(4, 10)) +
+  labs(x = "Sample", y = "BGC", fill = "BGC", size = "Total RPKM") +
+  theme_bw()  
+
+ggsave(ggsave("/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/to_britt/toxins_together_total.png",width = 8, height =8, dpi=300, scale =2, limitsize = FALSE))
+ggsave(ggsave("/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/to_britt/toxins_together_total.pdf",width = 8, height =8, dpi=300, scale =2, limitsize = FALSE))
+
+
+####Visualization for average rpkm-faceted
+cov_core75_final %>%
+  ggplot(aes(x = replicate, y = compound, fill = organism, size = average_rpkm)) +
+  geom_point(shape = 21) +
+  scale_fill_manual(values = col_vector) +
+  scale_size_continuous(range = c(4, 10)) +
+  labs(x = "Sample", y = "BGC", fill = "BGC", size = "Total RPKM") +
+  theme_bw()  + facet_grid(~lake_name, scales = "free")
+
+ggsave(ggsave("/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/to_britt/toxins_faceted_average.png",width = 8, height =8, dpi=300, scale =2, limitsize = FALSE))
+ggsave(ggsave("/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/to_britt/toxins_faceted_average.pdf",width = 8, height =8, dpi=300, scale =2, limitsize = FALSE))
+
+
+####Visualization for average rpkm-not faceted
+cov_core75_final2 = cov_core75_final %>% mutate(unique = fct_relevel(unique, 
+            "R1 _ LV", "R2 _ LV", "R1 _ LN", 
+            "R2 _ LN"))
+
+
+cov_core75_final2 %>%
+  ggplot(aes(x = unique, y = compound, fill = organism, size = average_rpkm)) +
+  geom_point(shape = 21) +
+  scale_fill_manual(values = col_vector) +
+  scale_size_continuous(range = c(4, 10)) +
+  labs(x = "Sample", y = "BGC", fill = "BGC", size = "Total RPKM") +
+  theme_bw()  
+
+ggsave(ggsave("/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/to_britt/toxins_together_average.png",width = 8, height =8, dpi=300, scale =2, limitsize = FALSE))
+ggsave(ggsave("/geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/to_britt/toxins_together_average.pdf",width = 8, height =8, dpi=300, scale =2, limitsize = FALSE))
+```
+
+
+
+```{r}
+##Lastly, I wanted to check on the potential presence of microcystin and cylindrospermopsin in LV, LN, LS to make sure we are covering the management bases there. I will map the forward reads onto the microcystin and cylindrospermopsin references to see if they are present in those samples. Those figures are also included in the folder. See below for the steps:
+
+#Make BlastDB
+# /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references$ makeblastdb -in mcyPCC7806_withflanks.fa -dbtype nucl -logfile flanking_mcy.dblog
+# /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references$ makeblastdb -in cyr_cylindro_0000978.fa -dbtype nucl -logfile cylindro_cyr.dblog
+# 
+# #Convert forward reads to fasta file 
+# unpigz -cp16 /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/reads/*.fastq.gz | paste - - - - | cut -f 1,2 | sed 's/^@/>/' | tr "\t" "\n" > /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/reads/*.fasta
+# 
+# #Run blast on reads 
+# cd /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/blast_results
+# blastn -query /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/reads/samp_4317_fwd.fasta -db /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/mcyPCC7806_withflanks.fa -outfmt 6 -out samp_4317_blast_mcy.blastn
+# blastn -query /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/reads/samp_4317_fwd.fasta -db /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/cyr_cylindro_0000978.fa -outfmt 6 -out samp_4317_blast_cylindro.blastn
+# 
+# blastn -query /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/reads/samp_4318_fwd.fasta -db /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/mcyPCC7806_withflanks.fa -outfmt 6 -out samp_4318_blast_mcy.blastn
+# blastn -query /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/reads/samp_4318_fwd.fasta -db /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/cyr_cylindro_0000978.fa -outfmt 6 -out samp_4318_blast_cylindro.blastn
+# 
+# blastn -query /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/reads/samp_4327_fwd.fasta -db /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/mcyPCC7806_withflanks.fa -outfmt 6 -out samp_4327_blast_mcy.blastn
+# blastn -query /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/reads/samp_4327_fwd.fasta -db /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/cyr_cylindro_0000978.fa -outfmt 6 -out samp_4327_blast_cylindro.blastn
+# 
+# blastn -query /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/reads/samp_4328_fwd.fasta -db /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/mcyPCC7806_withflanks.fa -outfmt 6 -out samp_4328_blast_mcy.blastn
+# blastn -query /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/reads/samp_4328_fwd.fasta -db /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/cyr_cylindro_0000978.fa -outfmt 6 -out samp_4328_blast_cylindro.blastn
+# 
+# blastn -query /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/reads/samp_4329_fwd.fasta -db /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/mcyPCC7806_withflanks.fa -outfmt 6 -out samp_4329_blast_mcy.blastn
+# blastn -query /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/reads/samp_4329_fwd.fasta -db /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/cyr_cylindro_0000978.fa -outfmt 6 -out samp_4329_blast_cylindro.blastn
+# 
+# blastn -query /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/reads/samp_4330_fwd.fasta -db /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/mcyPCC7806_withflanks.fa -outfmt 6 -out samp_4330_blast_mcy.blastn
+# blastn -query /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/reads/samp_4330_fwd.fasta -db /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/cyr_cylindro_0000978.fa -outfmt 6 -out samp_4330_blast_cylindro.blastn
+# 
+# 
+# #Make figures
+# plot-blast-frag-cov -r /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/mcyPCC7806_withflanks.fa samp_4317_blast_mcy.blastn
+# plot-blast-frag-cov -r /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/mcyPCC7806_withflanks.fa samp_4318_blast_mcy.blastn
+# plot-blast-frag-cov -r /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/mcyPCC7806_withflanks.fa samp_4327_blast_mcy.blastn
+# plot-blast-frag-cov -r /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/mcyPCC7806_withflanks.fa samp_4328_blast_mcy.blastn
+# plot-blast-frag-cov -r /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/mcyPCC7806_withflanks.fa samp_4329_blast_mcy.blastn
+# plot-blast-frag-cov -r /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/mcyPCC7806_withflanks.fa samp_4330_blast_mcy.blastn
+# 
+# plot-blast-frag-cov -r /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/cyr_cylindro_0000978.fa samp_4317_blast_cylindro.blastn
+# plot-blast-frag-cov -r /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/cyr_cylindro_0000978.fa samp_4318_blast_cylindro.blastn
+# plot-blast-frag-cov -r /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/cyr_cylindro_0000978.fa samp_4327_blast_cylindro.blastn
+# plot-blast-frag-cov -r /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/cyr_cylindro_0000978.fa samp_4328_blast_cylindro.blastn
+# plot-blast-frag-cov -r /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/cyr_cylindro_0000978.fa samp_4329_blast_cylindro.blastn
+# plot-blast-frag-cov -r /geomicro/data21/lnhart/Projects/Kenya_2022/Zepernick_trilakes/toxin_readmap/results/toxin_blast/references/cyr_cylindro_0000978.fa samp_4330_blast_cylindro.blastn
+
+
+```
+
